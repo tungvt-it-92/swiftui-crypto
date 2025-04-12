@@ -9,7 +9,9 @@ import SwiftUI
 struct SwiftUICryptoApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack {
+                HomeView()
+            }
         }
     }
 }
