@@ -35,7 +35,7 @@ struct LocalFileService {
     func getImage(folderName: String, imageName: String) -> UIImage? {
         let imageKey = "\(folderName)/\(imageName)" as NSString
         if let image = cached.object(forKey: imageKey) {
-            MyLogger.debugLog("LocalFileService: getImage: \(imageKey) form cached")
+            MyLogger.debugLog("LocalFileService: getImage: \(imageKey) from cached")
             return image
         }
         

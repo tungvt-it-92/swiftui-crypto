@@ -6,7 +6,7 @@ import Foundation
 import Combine
 
 protocol CoinGeckoApiProtocol {
-    func fetchCoins() -> AnyPublisher<[CoinModel], Error>
+    func fetchCoins() -> AnyPublisher<[CoinModel], APIError>
 }
 
 struct CoinGeckoApi: CoinGeckoApiProtocol {
@@ -20,7 +20,7 @@ struct CoinGeckoApi: CoinGeckoApiProtocol {
         jsonDecoder.dateDecodingStrategy = .formatted(dateFormatter)
     }
     
-    func fetchCoins() -> AnyPublisher<[CoinModel], Error> {
+    func fetchCoins() -> AnyPublisher<[CoinModel], APIError> {
         guard let endpointUrl = buildEndpointUrl(
             with: "coins/markets?vs_currency=usd&page=1&per_page=250&sparkline=true"
         ) else {
@@ -30,6 +30,16 @@ struct CoinGeckoApi: CoinGeckoApiProtocol {
         
         return NetworkService().execute(endpointUrl: endpointUrl)
             .decode(type: [CoinModel].self, decoder: jsonDecoder)
+            .mapError{ error in
+                if let apiError = error as? APIError {
+                    return apiError
+                }
+                
+                if error is DecodingError {
+                    return .decodingFailed(message: "Failed to decode CoinModel")
+                }
+                return .unknown
+            }
             .map({ coins in
                 return coins.map { coin in
                     var newCoin = coin
