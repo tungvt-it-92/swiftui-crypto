@@ -16,7 +16,7 @@ struct CoinItemView: View {
                 .foregroundStyle(Color.theme.secondaryTextColor)
                 .frame(minWidth: 30)
             
-            Circle()
+            CoinImageView(coin: coin)
                 .frame(width: 30, height: 30)
                 .padding(.horizontal, 5)
             
@@ -31,7 +31,7 @@ struct CoinItemView: View {
             VStack(alignment: .trailing) {
                 if showHoldingColumn {
                     Text("\(coin.currentHoldingValue.valueOrZero().asCurrency())")
-                    Text("\(coin.currentHolding.valueOrZero())")
+                    Text(coin.currentHolding.valueOrZero().asNumberString())
                 } else {
                     Text("\(coin.high24h.valueOrZero().asCurrency())")
                     Text("\(coin.low24h.valueOrZero().asCurrency())")
