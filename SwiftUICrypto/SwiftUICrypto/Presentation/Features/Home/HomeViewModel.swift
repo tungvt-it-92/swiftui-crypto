@@ -9,6 +9,7 @@ import Combine
 class HomeViewModel: ObservableObject {
     @Published var filteredCoins: [CoinModel] = []
     @Published var inputSearchText: String = ""
+    @Published var marketData: MarketData?
     
     @Published var error: APIError?
     @Published var isShowError: Bool = false
@@ -27,7 +28,7 @@ class HomeViewModel: ObservableObject {
             .sink { [weak self] completion in
                 switch completion {
                 case .finished:
-                    MyLogger.debugLog("FINISHED")
+                    MyLogger.debugLog("FetchCoins FINISHED")
                 case .failure(let error):
                     MyLogger.debugLog("ERROR \(error.localizedDescription)")
                     self?.error = error
@@ -38,6 +39,25 @@ class HomeViewModel: ObservableObject {
                 self?.filteredCoins = coins
             }
             .store(in: &cancellables)
+    }
+    
+    func fetchMarketData() async {
+        coinGeckoApi
+            .fetchMarketData()
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    MyLogger.debugLog("fetchMarketData FINISHED")
+                case .failure(let error):
+                    MyLogger.debugLog("ERROR \(error.localizedDescription)")
+                    self?.error = error
+                    self?.isShowError = true
+                }
+            } receiveValue: { [weak self] marketData in
+                self?.marketData = marketData.data
+            }
+            .store(in: &cancellables)
+
     }
     
     private func addSubscription() {

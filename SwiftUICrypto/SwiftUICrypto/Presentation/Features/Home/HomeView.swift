@@ -18,6 +18,10 @@ struct HomeView: View {
             VStack {
                 headerView
                 
+                if let marketData = homeVM.marketData {
+                    MarketDataView(marketData: marketData)
+                }
+                
                 searchView
                 
                 tableHeaderView
@@ -38,6 +42,9 @@ struct HomeView: View {
         .onAppear {
             Task {
                 await homeVM.fetchCoins()
+            }
+            Task {
+                await homeVM.fetchMarketData()
             }
         }
         .alert(isPresented: $homeVM.isShowError, error: homeVM.error) {}

@@ -8,6 +8,30 @@ import Foundation
 // Helper for ISO 8601 dates
 private let isoFormatter = ISO8601DateFormatter()
 
+let previewMarketData = MarketData(
+    activeCryptocurrencies: 17055,
+    upcomingIcos: 0,
+    ongoingIcos: 49,
+    endedIcos: 3376,
+    markets: 1300,
+    totalMarketCap: [
+        "btc": 32895176.620890114,
+        "usd": 2772501357230.9385
+    ],
+    totalVolume: [
+        "btc": 1021096.3045046378,
+        "usd": 86060972486.3061,
+        "aed": 316101951942.2023
+    ],
+    marketCapPercentage: [
+        "btc": 60.34509322985012,
+        "eth": 6.975324345081208,
+        "usdt": 5.205349382795324,
+    ],
+    marketCapChangePercentage24hUsd: -0.586787764447509,
+    updatedAt: 1744547615
+)
+
 let previewCoin = CoinModel(
     id: "bitcoin",
     symbol: "BTC",
