@@ -18,21 +18,23 @@ struct CoinItemView: View {
             
             Circle()
                 .frame(width: 30, height: 30)
+                .padding(.horizontal, 5)
             
             Text(coin.symbol.uppercased())
                 .font(.headline)
-                .padding(.leading, 10)
+                .padding(.leading, 5)
                 .foregroundStyle(Color.theme.accentColor)
+                .minimumScaleFactor(0.5)
             
             Spacer()
             
             VStack(alignment: .trailing) {
                 if showHoldingColumn {
-                    Text("\((coin.currentHoldingValue ?? 0).asCurrency())")
-                    Text("\(coin.currentHolding ?? 0)")
+                    Text("\(coin.currentHoldingValue.valueOrZero().asCurrency())")
+                    Text("\(coin.currentHolding.valueOrZero())")
                 } else {
-                    Text("\(coin.high24h.asCurrency())")
-                    Text("\(coin.low24h.asCurrency())")
+                    Text("\(coin.high24h.valueOrZero().asCurrency())")
+                    Text("\(coin.low24h.valueOrZero().asCurrency())")
                 }
             }
             .minimumScaleFactor(0.1)
@@ -40,19 +42,19 @@ struct CoinItemView: View {
             .font(.caption)
             
             VStack(alignment: .trailing) {
-                Text("\(coin.currentPrice.asCurrency())")
+                Text("\(coin.currentPrice.valueOrZero().asCurrency())")
                     .bold()
                     .foregroundStyle(Color.theme.accentColor)
                 
-                Text("\(coin.priceChangePercentage24h.asPercentageString())")
+                Text("\(coin.priceChangePercentage24h.valueOrZero().asPercentageString())")
                     .foregroundStyle(
-                        coin.priceChangePercentage24h > 0 ? Color.theme.greenColor : Color.theme.redColor
+                        coin.priceChangePercentage24h.valueOrZero() > 0 ? Color.theme.greenColor : Color.theme.redColor
                     )
             }
             .minimumScaleFactor(0.1)
             .frame(width: UIScreen.main.bounds.width / 3, alignment: .trailing)
             
-            Image(systemName: coin.favorite ? "star.fill" : "star")
+            Image(systemName: coin.favorite == true ? "star.fill" : "star")
                 .foregroundStyle(Color.theme.accentColor)
                 .frame(width: 30, height: 30)
         }
@@ -65,7 +67,7 @@ struct CoinItemView: View {
     Group {
         CoinItemView(coin: previewCoin, showHoldingColumn: false)
         CoinItemView(coin: previewCoin, showHoldingColumn: true)
-    }    
+    }
 }
 
 #endif
