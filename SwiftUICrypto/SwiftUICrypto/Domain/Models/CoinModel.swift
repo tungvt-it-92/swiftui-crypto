@@ -33,9 +33,9 @@ struct CoinModel: Identifiable, Codable {
     let roi: ROI?
     let lastUpdated: Date
     let sparklineIn7d: Sparkline?
-    let favorite: Bool?
-    let currentHolding: Double?
-    let currentHoldingValue: Double?
+    var favorite: Bool?
+    var currentHolding: Double?
+    var currentHoldingValue: Double?
 
     enum CodingKeys: String, CodingKey {
         case id, symbol, name, image

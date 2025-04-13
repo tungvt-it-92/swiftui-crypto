@@ -9,9 +9,7 @@ extension Double {
     private var currencyFormatter: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.numberStyle = .currency
         formatter.locale = Locale(identifier: "en_US")
-        formatter.maximumFractionDigits = 6
         formatter.minimumFractionDigits = 2
         
         return formatter
@@ -31,11 +29,7 @@ extension Double {
         return String(format: "%.2f", self)
     }
     
-    func asNumberString2() -> String {
-        return String(format: "%.0f", self)
-    }
-    
     func asPercentageString() -> String {
-        return String(format: "%.2f%%", self)
+        return String(format: "%.2f%", self)
     }
 }
