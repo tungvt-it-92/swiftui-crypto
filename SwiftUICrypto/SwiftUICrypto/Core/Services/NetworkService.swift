@@ -11,7 +11,7 @@ enum APIError: LocalizedError {
     case badResponse(url: URL)
     case decodingFailed(message: String)
     case unknown
-
+    
     var errorDescription: String? {
         switch self {
         case .urlInvalid:
@@ -41,17 +41,38 @@ struct NetworkService {
                 }
                 MyLogger.debugLog(
                     """
-                    Endpoint \(endpointUrl.absoluteString):
+                    Endpoint: \(endpointUrl.absoluteString):
                     Response: \(String(describing: String(data: output.data, encoding: .utf8)))
                     """
                 )
-
+                
                 return output.data
             }
             .receive(on: DispatchQueue.main)
-        #if DEBUG
+#if DEBUG
             .print()
-        #endif
+#endif
+            .eraseToAnyPublisher()
+    }
+    
+    func execute<T>(
+        endpointUrl: URL,
+        type: T.Type,
+        jsonDecoder: JSONDecoder = JSONDecoder(),
+        cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy
+    ) -> AnyPublisher<T, APIError> where T: Decodable {
+        return execute(endpointUrl: endpointUrl, cachePolicy: cachePolicy)
+            .decode(type: T.self, decoder: jsonDecoder)
+            .mapError { error in
+                if let apiError = error as? APIError {
+                    return apiError
+                }
+                
+                if error is DecodingError {
+                    return .decodingFailed(message: "Failed to decode \(T.Type.self)")
+                }
+                return .unknown
+            }
             .eraseToAnyPublisher()
     }
 }

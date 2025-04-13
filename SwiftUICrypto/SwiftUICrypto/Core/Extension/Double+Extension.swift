@@ -30,6 +30,26 @@ extension Double {
     }
     
     func asPercentageString() -> String {
-        return String(format: "%.2f%", self)
+        return String(format: "%.2f%%", self)
+    }
+    
+    func formattedWithAbbreviations() -> String {
+        let num = abs(self)
+        let sign = self < 0 ? "-" : ""
+        
+        switch num {
+        case ..<1_000:
+            return String(format: "$%@%.2f", sign, num)
+        case 1_000..<1_000_000:
+            return String(format: "$%@%.2fK", sign, num / 1_000)
+        case 1_000_000..<1_000_000_000:
+            return String(format: "$%@%.2fM", sign, num / 1_000_000)
+        case 1_000_000_000..<1_000_000_000_000:
+            return String(format: "$%@%.2fBn", sign, num / 1_000_000_000)
+        case 1_000_000_000_000...:
+            return String(format: "$%@%.2fTn", sign, num / 1_000_000_000_000)
+        default:
+            return String(format: "$%@%.2f", sign, num)
+        }
     }
 }
