@@ -8,7 +8,7 @@ import Foundation
 struct CoinModel: Identifiable, Codable {
     let id: String
     let symbol: String
-    let name: String?
+    let name: String
     let image: String?
     let currentPrice: Double?
     let marketCap: Double?

@@ -18,6 +18,8 @@ struct HomeView: View {
             VStack {
                 headerView
                 
+                searchView
+                
                 tableHeaderView
                 
                 if !showPortfolio {
@@ -38,6 +40,7 @@ struct HomeView: View {
                 await homeVM.fetchCoins()
             }
         }
+        .alert(isPresented: $homeVM.isShowError, error: homeVM.error) {}
     }
 }
 
@@ -67,7 +70,7 @@ extension HomeView {
     }
     
     private var allCoinList: some View {
-        List(homeVM.allCoins, id: \.id) { coin in
+        List(homeVM.filteredCoins, id: \.id) { coin in
             CoinItemView(coin: coin, showHoldingColumn: false)
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         }
@@ -77,7 +80,7 @@ extension HomeView {
     }
     
     private var portfolioCoinList: some View {
-        List(homeVM.allCoins, id: \.id) { coin in
+        List(homeVM.filteredCoins, id: \.id) { coin in
             CoinItemView(coin: coin, showHoldingColumn: true)
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         }
@@ -100,8 +103,13 @@ extension HomeView {
                 .frame(width: 30)
         }
         .font(.caption)
-        .foregroundStyle(Color.theme.secondaryTextColor)
+        .foregroundStyle(Color.theme.accentColor)
         .padding(0)
+    }
+    
+    private var searchView: some View {
+        SearchBarView(inputText: $homeVM.inputSearchText)
+            .padding(.vertical, 15)
     }
 }
 

@@ -9,7 +9,8 @@ import Foundation
 enum APIError: LocalizedError {
     case urlInvalid
     case badResponse(url: URL)
-    case decodingFailed
+    case decodingFailed(message: String)
+    case unknown
 
     var errorDescription: String? {
         switch self {
@@ -17,8 +18,10 @@ enum APIError: LocalizedError {
             return "URL is invalid"
         case let .badResponse(url):
             return "Bad response from the server: \n \(url.absoluteString)"
-        case .decodingFailed:
-            return "Decoding failed"
+        case .decodingFailed(let msg):
+            return "Decoding failed \(msg)"
+        case .unknown:
+            return "Unknown error"
         }
     }
 }
