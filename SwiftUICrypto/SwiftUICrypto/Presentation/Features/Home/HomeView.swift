@@ -7,6 +7,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var showPortfolio: Bool = false
+    @State private var showEditPortfolio: Bool = false
     @EnvironmentObject private var homeVM: HomeViewModel
     
     var body: some View {
@@ -40,12 +41,11 @@ struct HomeView: View {
             .padding(.horizontal)
         }
         .onAppear {
-            Task {
-                await homeVM.fetchCoins()
-            }
-            Task {
-                await homeVM.fetchMarketData()
-            }
+            homeVM.fetchCoins()
+            homeVM.fetchMarketData()
+        }
+        .sheet(isPresented: $showEditPortfolio) {
+            EditPortfolioView()
         }
         .alert(isPresented: $homeVM.isShowError, error: homeVM.error) {}
     }
@@ -55,7 +55,11 @@ struct HomeView: View {
 extension HomeView {
     private var headerView: some View {
         HStack {
-            CircleButton(iconName: showPortfolio ? "plus" : "info") {}
+            CircleButton(iconName: showPortfolio ? "plus" : "info") {
+                if showPortfolio {
+                    showEditPortfolio.toggle()
+                }
+            }
                 .background {
                     AnimatedCircleView(isAnimating: showPortfolio)
                 }

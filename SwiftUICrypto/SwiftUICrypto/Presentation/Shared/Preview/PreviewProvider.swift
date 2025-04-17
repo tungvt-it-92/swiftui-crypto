@@ -36,10 +36,9 @@ let previewCoin = CoinModel(
     id: "bitcoin",
     symbol: "BTC",
     name: "Bitcoin",
-    image: "https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400",
+    marketCapRank: 1, image: "https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400",
     currentPrice: 65000.75,
     marketCap: 1_283_456_789_123,
-    marketCapRank: 1,
     fullyDilutedValuation: 1_365_000_000_000,
     totalVolume: 45_678_901_234,
     high24h: 67000.50,
@@ -235,4 +234,64 @@ let previewCoin = CoinModel(
     currentHolding: 1224,
     currentHoldingValue: 10000000
 )
+
+struct PreviewDataProvider {
+    static let shared = PreviewDataProvider()
+    
+    let previewHomeVM = HomeViewModel()
+    
+    private init() {
+        let eth = CoinModel(
+            id: "ethereum",
+            symbol: "Ethereum",
+            name: "eth",
+            marketCapRank: 1,
+            image: "https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1696501628",
+            currentPrice: 2000
+        )
+        let tether = CoinModel(
+            id: "tether",
+            symbol: "usdt",
+            name: "Tether",
+            marketCapRank: 2,
+            image: "https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+            currentPrice: 1000
+        )
+        let ripple = CoinModel(
+            id: "ripple",
+            symbol: "xrp",
+            name: "XRP",
+            marketCapRank: 3,
+            image: "https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png?1696501442",
+            currentPrice: 500
+        )
+        let binancecoin = CoinModel(
+            id: "binancecoin",
+            symbol: "bnb",
+            name: "BNB",
+            marketCapRank: 4,
+            image: "https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970",
+            currentPrice: 200
+        )
+        let solana = CoinModel(
+            id: "solana",
+            symbol: "sol",
+            name: "Solana",
+            marketCapRank: 5,
+            image: "https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756",
+            currentPrice: 50
+        )
+        
+        previewHomeVM.filteredCoins = [
+            previewCoin,
+            eth,
+            tether,
+            ripple,
+            binancecoin,
+            solana
+        ]
+    }
+}
+
+
 //#endif

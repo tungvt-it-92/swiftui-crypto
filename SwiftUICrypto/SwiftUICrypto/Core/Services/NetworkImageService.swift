@@ -8,14 +8,13 @@ import Combine
 struct NetworkImageService {
     let coinImagesFolder = "coinImages"
     
-    init () {
-        
-    }
-    
     func downloadImage(imageUrl: String) -> AnyPublisher<UIImage?, Never> {
         let imageKey = imageUrl.sha256()
         
-        if let cachedImage = LocalFileService.shared.getImage(folderName: coinImagesFolder, imageName: imageKey) {
+        if let cachedImage = LocalFileService.shared.getImage(
+            folderName: coinImagesFolder,
+            imageName: imageKey
+        ) {
             return Just(cachedImage)
                 .eraseToAnyPublisher()
         }
