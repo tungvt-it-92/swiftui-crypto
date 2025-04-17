@@ -11,14 +11,14 @@ enum APIError: LocalizedError {
     case badResponse(url: URL)
     case decodingFailed(message: String)
     case unknown
-    
+
     var errorDescription: String? {
         switch self {
         case .urlInvalid:
             return "URL is invalid"
         case let .badResponse(url):
             return "Bad response from the server: \n \(url.absoluteString)"
-        case .decodingFailed(let msg):
+        case let .decodingFailed(msg):
             return "Decoding failed \(msg)"
         case .unknown:
             return "Unknown error"
@@ -45,33 +45,34 @@ struct NetworkService {
                     Response: \(String(describing: String(data: output.data, encoding: .utf8)))
                     """
                 )
-                
+
                 return output.data
             }
             .receive(on: DispatchQueue.main)
-#if DEBUG
+        #if DEBUG
             .print()
-#endif
+        #endif
             .eraseToAnyPublisher()
     }
-    
-    func execute<T>(
+
+    func execute<T: Decodable>(
         endpointUrl: URL,
-        type: T.Type,
         jsonDecoder: JSONDecoder = JSONDecoder(),
         cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy
-    ) -> AnyPublisher<T, APIError> where T: Decodable {
+    ) -> AnyPublisher<T, APIError> {
         return execute(endpointUrl: endpointUrl, cachePolicy: cachePolicy)
             .decode(type: T.self, decoder: jsonDecoder)
             .mapError { error in
-                if let apiError = error as? APIError {
+                switch error {
+                case let apiError as APIError:
                     return apiError
+                case is DecodingError:
+                    return .decodingFailed(
+                        message: "Failed to decode response of type \(String(describing: T.self))"
+                    )
+                default:
+                    return .unknown
                 }
-                
-                if error is DecodingError {
-                    return .decodingFailed(message: "Failed to decode \(T.Type.self)")
-                }
-                return .unknown
             }
             .eraseToAnyPublisher()
     }
