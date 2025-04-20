@@ -37,35 +37,72 @@ struct CoinModel: Identifiable, Codable {
         favorite: Bool? = nil,
         currentHolding: Double? = nil,
         currentHoldingValue: Double? = nil) {
-        
-        self.id = id
-        self.symbol = symbol
-        self.name = name
-        self.image = image
-        self.currentPrice = currentPrice
-        self.marketCap = marketCap
-        self.marketCapRank = marketCapRank
-        self.fullyDilutedValuation = fullyDilutedValuation
-        self.totalVolume = totalVolume
-        self.high24h = high24h
-        self.low24h = low24h
-        self.priceChange24h = priceChange24h
-        self.priceChangePercentage24h = priceChangePercentage24h
-        self.marketCapChange24h = marketCapChange24h
-        self.marketCapChangePercentage24h = marketCapChangePercentage24h
-        self.circulatingSupply = circulatingSupply
-        self.totalSupply = totalSupply
-        self.maxSupply = maxSupply
-        self.ath = ath
-        self.athChangePercentage = athChangePercentage
-        self.athDate = athDate
-        self.atl = atl
-        self.atlChangePercentage = atlChangePercentage
-        self.atlDate = atlDate
-        self.roi = roi
-        self.lastUpdated = lastUpdated
-        self.sparklineIn7d = sparklineIn7d
-        self.favorite = favorite
+            
+            self.id = id
+            self.symbol = symbol
+            self.name = name
+            self.image = image
+            self.currentPrice = currentPrice
+            self.marketCap = marketCap
+            self.marketCapRank = marketCapRank
+            self.fullyDilutedValuation = fullyDilutedValuation
+            self.totalVolume = totalVolume
+            self.high24h = high24h
+            self.low24h = low24h
+            self.priceChange24h = priceChange24h
+            self.priceChangePercentage24h = priceChangePercentage24h
+            self.marketCapChange24h = marketCapChange24h
+            self.marketCapChangePercentage24h = marketCapChangePercentage24h
+            self.circulatingSupply = circulatingSupply
+            self.totalSupply = totalSupply
+            self.maxSupply = maxSupply
+            self.ath = ath
+            self.athChangePercentage = athChangePercentage
+            self.athDate = athDate
+            self.atl = atl
+            self.atlChangePercentage = atlChangePercentage
+            self.atlDate = atlDate
+            self.roi = roi
+            self.lastUpdated = lastUpdated
+            self.sparklineIn7d = sparklineIn7d
+            self.favorite = favorite
+            self.currentHolding = currentHolding
+            self.currentHoldingValue = currentHoldingValue
+        }
+    
+    init(
+        coin: CoinModel,
+        currentHolding: Double? = nil,
+        currentHoldingValue: Double? = nil
+    ){
+        self.id = coin.id
+        self.symbol = coin.symbol
+        self.name = coin.name
+        self.image = coin.image
+        self.currentPrice = coin.currentPrice
+        self.marketCap = coin.marketCap
+        self.marketCapRank = coin.marketCapRank
+        self.fullyDilutedValuation = coin.fullyDilutedValuation
+        self.totalVolume = coin.totalVolume
+        self.high24h = coin.high24h
+        self.low24h = coin.low24h
+        self.priceChange24h = coin.priceChange24h
+        self.priceChangePercentage24h = coin.priceChangePercentage24h
+        self.marketCapChange24h = coin.marketCapChange24h
+        self.marketCapChangePercentage24h = coin.marketCapChangePercentage24h
+        self.circulatingSupply = coin.circulatingSupply
+        self.totalSupply = coin.totalSupply
+        self.maxSupply = coin.maxSupply
+        self.ath = coin.ath
+        self.athChangePercentage = coin.athChangePercentage
+        self.athDate = coin.athDate
+        self.atl = coin.atl
+        self.atlChangePercentage = coin.atlChangePercentage
+        self.atlDate = coin.atlDate
+        self.roi = coin.roi
+        self.lastUpdated = coin.lastUpdated
+        self.sparklineIn7d = coin.sparklineIn7d
+        self.favorite = coin.favorite
         self.currentHolding = currentHolding
         self.currentHoldingValue = currentHoldingValue
     }
@@ -100,7 +137,7 @@ struct CoinModel: Identifiable, Codable {
     var favorite: Bool?
     var currentHolding: Double?
     var currentHoldingValue: Double?
-
+    
     enum CodingKeys: String, CodingKey {
         case id, symbol, name, image
         case currentPrice = "current_price"
@@ -139,7 +176,7 @@ struct Sparkline: Codable {
 struct ROI: Codable {
     let times: Double?
     let currency: String?
-
+    
     enum CodingKeys: String, CodingKey {
         case times
         case currency
