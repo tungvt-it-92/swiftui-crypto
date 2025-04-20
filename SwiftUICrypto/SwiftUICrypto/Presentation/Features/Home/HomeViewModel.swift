@@ -8,6 +8,7 @@ import Foundation
 
 class HomeViewModel: ObservableObject {
     @Published var filteredCoins: [CoinModel] = []
+    @Published var portfolioCoins: [CoinModel] = []
     @Published var inputSearchText: String = ""
     @Published var marketData: MarketData?
 
@@ -16,10 +17,12 @@ class HomeViewModel: ObservableObject {
 
     private var allCoins: [CoinModel] = []
     private var coinGeckoApi = CoinGeckoApi()
+    private var portfolioRepository = PortfolioRepository()
     private var cancellables = Set<AnyCancellable>()
 
     init() {
         listenSearchKeyChanged()
+        listenPortfolioUpdated()
     }
 
     func fetchCoins() {
@@ -29,9 +32,6 @@ class HomeViewModel: ObservableObject {
                 coins.map { coin in
                     var newCoin = coin
                     newCoin.favorite = Int.random(in: 1 ..< 10) < 3
-                    newCoin.currentHolding = Double.random(in: 100 ..< 10000)
-                    newCoin.currentHoldingValue = Double.random(in: 100 ..< 1000)
-
                     return newCoin
                 }
             }
@@ -68,6 +68,10 @@ class HomeViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
+    func updatePortfolio(coin: CoinModel, amount: Double) {
+        portfolioRepository.updatePortfolio(coin: coin, amount: amount)
+    }
 
     private func listenSearchKeyChanged() {
         $inputSearchText
@@ -79,6 +83,28 @@ class HomeViewModel: ObservableObject {
                         || $0.name.lowercased().contains(value.lowercased())
                         || $0.id.lowercased().contains(value.lowercased())
                 } ?? []
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func listenPortfolioUpdated() {
+        $filteredCoins
+            .combineLatest(portfolioRepository.$savedCoins)
+            .map { (coins, savedCoins) -> [CoinModel] in
+                coins.compactMap { coin -> CoinModel? in
+                    guard let coinEntity = savedCoins.first(where: { $0.coinID == coin.id }) else {
+                        return nil
+                    }
+                    
+                    return CoinModel(
+                        coin: coin,
+                        currentHolding: coinEntity.amount,
+                        currentHoldingValue: coinEntity.amount * coin.currentPrice.valueOrZero()
+                    )                    
+                }
+            }
+            .sink { coins in
+                self.portfolioCoins = coins
             }
             .store(in: &cancellables)
     }

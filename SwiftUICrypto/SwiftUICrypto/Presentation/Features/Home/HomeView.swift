@@ -91,7 +91,7 @@ extension HomeView {
     }
     
     private var portfolioCoinList: some View {
-        List(homeVM.filteredCoins, id: \.id) { coin in
+        List(homeVM.portfolioCoins, id: \.id) { coin in
             CoinItemView(coin: coin, showHoldingColumn: true)
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         }
