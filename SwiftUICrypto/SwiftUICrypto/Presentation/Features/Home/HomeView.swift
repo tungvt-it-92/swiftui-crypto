@@ -19,9 +19,10 @@ struct HomeView: View {
             VStack {
                 headerView
                 
-                if let marketData = homeVM.marketData {
-                    MarketDataView(marketData: marketData)
-                }
+                StatisticView(
+                    statisticModels: homeVM.statistics,
+                    showPortfolioColumn: showPortfolio
+                )
                 
                 searchView
                 
@@ -60,9 +61,9 @@ extension HomeView {
                     showEditPortfolio.toggle()
                 }
             }
-                .background {
-                    AnimatedCircleView(isAnimating: showPortfolio)
-                }
+            .background {
+                AnimatedCircleView(isAnimating: showPortfolio)
+            }
             
             Spacer()
             
@@ -102,20 +103,74 @@ extension HomeView {
     
     private var tableHeaderView: some View {
         HStack(spacing: 0) {
-            Text("Coin")
+            HStack {
+                Text("Coin")
+                Image(systemName: "chevron.down")
+                    .opacity(
+                        [.rank, .rankReversed].contains(homeVM.sortOption) ? 1 : 0
+                    )
+                    .rotationEffect(Angle(degrees: homeVM.sortOption == .rank ? 0: 180))
+            }
+            .onTapGesture {
+                homeVM.sortOption = homeVM.sortOption == .rank ? .rankReversed : .rank
+            }
+            
             Spacer()
-            Text(showPortfolio ? "Holdings" : "Max/Min 24h")
-            Text("Price")
-                .frame(
-                    width: UIScreen.main.bounds.width / 3,
-                    alignment: .trailing
-                )
-            Spacer()
-                .frame(width: 30)
+            
+            if showPortfolio {
+                HStack {
+                    Text("Holdings")
+                    Image(systemName: "chevron.down")
+                        .opacity(
+                            [.holdings, .holdingsReversed].contains(homeVM.sortOption) ? 1 : 0
+                        )
+                        .rotationEffect(Angle(degrees: homeVM.sortOption == .holdings ? 0: 180))
+                }
+                .onTapGesture {
+                    homeVM.sortOption = homeVM.sortOption == .holdings ? .holdingsReversed : .holdings
+                }
+            } else {
+                HStack {
+                    Text("Max/Min 24h")
+                    Image(systemName: "chevron.down")
+                        .opacity(
+                            [.change24h, .change24hReversed].contains(homeVM.sortOption) ? 1 : 0
+                        )
+                        .rotationEffect(Angle(degrees: homeVM.sortOption == .change24h ? 0: 180))
+                }
+                .onTapGesture {
+                    homeVM.sortOption = homeVM.sortOption == .change24h ? .change24hReversed : .change24h
+                }
+            }
+            
+            HStack {
+                Text("Price")
+                Image(systemName: "chevron.down")
+                    .opacity(
+                        [.price, .priceReversed].contains(homeVM.sortOption) ? 1 : 0
+                    )
+                    .rotationEffect(Angle(degrees: homeVM.sortOption == .price ? 0: 180))
+            }
+            .onTapGesture {
+                homeVM.sortOption = homeVM.sortOption == .price ? .priceReversed : .price
+            }
+            .frame(
+                width: UIScreen.main.bounds.width / 3,
+                alignment: .trailing
+            )
+            
+            Button {
+                homeVM.refresh()
+            } label: {
+                Image(systemName: "goforward")
+            }
+            .rotationEffect(Angle(degrees: homeVM.isLoading ?  360 : 0), anchor: .center)
+            .padding(.leading, 5)
         }
         .font(.caption)
         .foregroundStyle(Color.theme.accentColor)
         .padding(0)
+        .animation(.linear(duration: 2.0), value: homeVM.isLoading)
     }
     
     private var searchView: some View {
@@ -130,7 +185,7 @@ extension HomeView {
         NavigationView {
             HomeView()
                 .navigationBarHidden(true)
-                .environmentObject(HomeViewModel())
+                .environmentObject(PreviewDataProvider.shared.previewHomeVM)
         }
     }
 }

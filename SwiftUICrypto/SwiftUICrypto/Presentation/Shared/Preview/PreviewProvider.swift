@@ -32,6 +32,12 @@ let previewMarketData = MarketData(
     updatedAt: 1744547615
 )
 
+let previewStatistics: [StatisticModel] = [
+    StatisticModel(title: "Total Market Cap", value: "2772501357230.9385"),
+    StatisticModel(title: "Total Volume", value: "86060972486.3061", percentageChange: -1.5),
+    StatisticModel(title: "Market Cap Change 24h", value: "10234567", percentageChange: 5.05)
+]
+
 let previewCoin = CoinModel(
     id: "bitcoin",
     symbol: "BTC",
