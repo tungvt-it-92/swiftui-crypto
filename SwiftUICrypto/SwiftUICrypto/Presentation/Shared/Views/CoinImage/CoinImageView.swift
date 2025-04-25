@@ -26,7 +26,6 @@ struct CoinImageView: View {
                             .resizable()
                     }
                 }
-                .frame(width: 32, height: 32)
             }
         }
         .onAppear {

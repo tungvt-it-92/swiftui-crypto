@@ -242,6 +242,18 @@ let previewCoin = CoinModel(
     currentHoldingValue: 10000000
 )
 
+let previewCoinDetailModel = CoinDetailModel(
+    id: "bitcoin",
+    symbol: "btc",
+    name: "Bitcoin",
+    description: Description(en: "Bitcoin is a decentralized digital currency, without a central bank or single administrator."),
+    image: ImageInfo(large: "https://example.com/bitcoin-large.png"),
+    categories: ["Cryptocurrency", "Blockchain"],
+    links: Link(homepage: ["https://bitcoin.org"], subredditUrl: "https://reddit.com/r/Bitcoin"),
+    hashingAlgorithm: "SHA-256",
+    blockTimeInMinutes: 10.0
+)
+
 struct PreviewDataProvider {
     static let shared = PreviewDataProvider()
     

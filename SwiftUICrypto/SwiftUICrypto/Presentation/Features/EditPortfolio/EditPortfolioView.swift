@@ -39,6 +39,8 @@ fileprivate struct CoinView: View {
     var body: some View {
         VStack {
             CoinImageView(coin: coinModel)
+                .frame(width: 32, height: 32)
+            
             Text("\(coinModel.symbol)")
                 .font(.headline)
                 .foregroundStyle(Color.theme.accentColor)
