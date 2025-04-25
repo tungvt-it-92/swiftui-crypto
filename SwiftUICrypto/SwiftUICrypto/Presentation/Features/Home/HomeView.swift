@@ -52,7 +52,6 @@ struct HomeView: View {
         .navigationDestination(item: $presentedDetailCoin, destination: { coin in
             return CoinDetailView(coin: coin)
         })
-        
         .alert(isPresented: $homeVM.isShowError, error: homeVM.error) {}
     }
 }

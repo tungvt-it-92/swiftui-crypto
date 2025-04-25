@@ -34,11 +34,15 @@ class CoinDetailViewModel: BaseViewModel {
             }
             .sink { [weak self] (data) in
                 self?.overviewStatistics = data.overviewsStatistics
+                self?.additionalStatistics = data.additionalStatistics
             }
             .store(in: &cancellables)
     }
     
-    func mapDataToAdditionalStatistics(coinDetail: CoinDetailModel, coin: CoinModel) -> [StatisticModel] {
+    func mapDataToAdditionalStatistics(
+        coinDetail: CoinDetailModel,
+        coin: CoinModel
+    ) -> [StatisticModel] {
         let highStatistic = StatisticModel(
             title: "24H High",
             value: coin.high24h.valueOrZero().formattedWithAbbreviations()
