@@ -8,6 +8,7 @@ import SwiftUI
 struct CoinItemView: View {
     let coin: CoinModel
     let showHoldingColumn: Bool
+    let onTapGestureAction: (() -> Void)?
     
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
@@ -58,6 +59,10 @@ struct CoinItemView: View {
                 .foregroundStyle(Color.theme.accentColor)
                 .frame(width: 30, height: 30)
         }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTapGestureAction?()
+        }
     }
 }
 
@@ -65,8 +70,8 @@ struct CoinItemView: View {
 
 #Preview(traits: .sizeThatFitsLayout) {
     Group {
-        CoinItemView(coin: previewCoin, showHoldingColumn: false)
-        CoinItemView(coin: previewCoin, showHoldingColumn: true)
+        CoinItemView(coin: previewCoin, showHoldingColumn: false) {}
+        CoinItemView(coin: previewCoin, showHoldingColumn: true) {}
     }
 }
 

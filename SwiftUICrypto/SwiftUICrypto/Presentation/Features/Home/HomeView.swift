@@ -8,6 +8,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var showPortfolio: Bool = false
     @State private var showEditPortfolio: Bool = false
+    @State private var presentedDetailCoin: CoinModel?
     @EnvironmentObject private var homeVM: HomeViewModel
     
     var body: some View {
@@ -48,6 +49,10 @@ struct HomeView: View {
         .sheet(isPresented: $showEditPortfolio) {
             EditPortfolioView()
         }
+        .navigationDestination(item: $presentedDetailCoin, destination: { coin in
+            return CoinDetailView(coin: coin)
+        })
+        
         .alert(isPresented: $homeVM.isShowError, error: homeVM.error) {}
     }
 }
@@ -83,8 +88,10 @@ extension HomeView {
     
     private var allCoinList: some View {
         List(homeVM.filteredCoins, id: \.id) { coin in
-            CoinItemView(coin: coin, showHoldingColumn: false)
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            CoinItemView(coin: coin, showHoldingColumn: false) {
+                presentedDetailCoin = coin
+            }
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         }
         .listRowSpacing(5)
         .listStyle(.plain)
@@ -93,8 +100,10 @@ extension HomeView {
     
     private var portfolioCoinList: some View {
         List(homeVM.portfolioCoins, id: \.id) { coin in
-            CoinItemView(coin: coin, showHoldingColumn: true)
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            CoinItemView(coin: coin, showHoldingColumn: true) {
+                presentedDetailCoin = coin
+            }
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         }
         .listRowSpacing(5)
         .listStyle(.plain)
@@ -182,7 +191,7 @@ extension HomeView {
 #if DEBUG
 #Preview(traits: .sizeThatFitsLayout) {
     Group {
-        NavigationView {
+        NavigationStack {
             HomeView()
                 .navigationBarHidden(true)
                 .environmentObject(PreviewDataProvider.shared.previewHomeVM)
