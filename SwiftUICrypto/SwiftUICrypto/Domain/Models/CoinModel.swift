@@ -5,7 +5,7 @@
 
 import Foundation
 
-struct CoinModel: Identifiable, Codable {
+struct CoinModel: Identifiable, Codable, Hashable {
     init(
         id: String,
         symbol: String,
@@ -169,11 +169,11 @@ struct CoinModel: Identifiable, Codable {
     }
 }
 
-struct Sparkline: Codable {
+struct Sparkline: Codable, Hashable {
     let price: [Double]?
 }
 
-struct ROI: Codable {
+struct ROI: Codable, Hashable {
     let times: Double?
     let currency: String?
     

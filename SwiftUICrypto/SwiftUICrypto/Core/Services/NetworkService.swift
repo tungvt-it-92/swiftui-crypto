@@ -11,7 +11,7 @@ enum APIError: LocalizedError {
     case badResponse(url: URL)
     case decodingFailed(message: String)
     case unknown
-
+    
     var errorDescription: String? {
         switch self {
         case .urlInvalid:
@@ -45,16 +45,16 @@ struct NetworkService {
                     Response: \(String(describing: String(data: output.data, encoding: .utf8)))
                     """
                 )
-
+                
                 return output.data
             }
             .receive(on: DispatchQueue.main)
-        #if DEBUG
+#if DEBUG
             .print()
-        #endif
+#endif
             .eraseToAnyPublisher()
     }
-
+    
     func execute<T: Decodable>(
         endpointUrl: URL,
         jsonDecoder: JSONDecoder = JSONDecoder(),
@@ -66,9 +66,23 @@ struct NetworkService {
                 switch error {
                 case let apiError as APIError:
                     return apiError
-                case is DecodingError:
+                case let decodeError as DecodingError:
+                    var errorMsg = ""
+                    switch decodeError {
+                    case .valueNotFound(_, let context):
+                        errorMsg = "DecodingError valueNotFound  \(context.debugDescription) \(context.codingPath) \(String(describing: context.underlyingError))"
+                    case .typeMismatch(_, let context):
+                        errorMsg = "DecodingError typeMismatch \(context.debugDescription) \(context.codingPath) \(String(describing: context.underlyingError))"
+                    case .keyNotFound(_, let context):
+                        errorMsg = "DecodingError keyNotFound \(context.debugDescription) \(context.codingPath) \(String(describing: context.underlyingError))"
+                    case .dataCorrupted(let context):
+                        errorMsg = "DecodingError valueNotFound  \(context.debugDescription) \(context.codingPath) \(String(describing: context.underlyingError))"
+                    default:
+                        errorMsg = decodeError.localizedDescription
+                    }
+                    
                     return .decodingFailed(
-                        message: "Failed to decode response of type \(String(describing: T.self))"
+                        message: "Failed to decode response of type \(String(describing: T.self)) with error: \(errorMsg)"
                     )
                 default:
                     return .unknown

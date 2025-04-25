@@ -17,23 +17,20 @@ enum SortCoinOption {
     case priceReversed
 }
 
-class HomeViewModel: ObservableObject {
+class HomeViewModel: BaseViewModel {
     @Published var filteredCoins: [CoinModel] = []
     @Published var portfolioCoins: [CoinModel] = []
     @Published var inputSearchText: String = ""
     @Published var statistics: [StatisticModel] = []
-    @Published var error: APIError?
-    @Published var isShowError: Bool = false
-    @Published var isLoading: Bool = false
     @Published var sortOption: SortCoinOption = .rank
     @Published private var marketData: MarketData?
     
     private var allCoins: [CoinModel] = []
-    private var coinGeckoApi = CoinGeckoApi()
+    private var coinGeckoApi: CoinGeckoApiProtocol = CoinGeckoApi()
     private var portfolioRepository = PortfolioRepository()
-    private var cancellables = Set<AnyCancellable>()
     
-    init() {
+    override init() {
+        super.init()
         listenSearchKeyChanged()
         listenPortfolioUpdated()
         listenMarketDataUpdated()
@@ -58,7 +55,6 @@ class HomeViewModel: ObservableObject {
                 case let .failure(error):
                     MyLogger.debugLog("ERROR \(error.localizedDescription)")
                     self?.error = error
-                    self?.isShowError = true
                 }
             } receiveValue: { [weak self] coins in
                 self?.allCoins = coins
@@ -78,7 +74,6 @@ class HomeViewModel: ObservableObject {
                 case let .failure(error):
                     MyLogger.debugLog("ERROR \(error.localizedDescription)")
                     self?.error = error
-                    self?.isShowError = true
                 }
             } receiveValue: { [weak self] marketData in
                 self?.marketData = marketData.data
