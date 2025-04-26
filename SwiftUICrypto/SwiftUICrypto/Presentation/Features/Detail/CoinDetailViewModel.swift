@@ -10,6 +10,9 @@ class CoinDetailViewModel: BaseViewModel {
     @Published var coin: CoinModel
     @Published var overviewStatistics: [StatisticModel] = []
     @Published var additionalStatistics: [StatisticModel] = []
+    @Published var coinDescription: String? = nil
+    @Published var homepageUrl: String? = nil
+    @Published var redditUrl: String? = nil
     
     private var coinGeckoApi: CoinGeckoApiProtocol = CoinGeckoApi()
     
@@ -18,11 +21,16 @@ class CoinDetailViewModel: BaseViewModel {
     }
     
     func fetchCoinDetail() {
-        coinGeckoApi.fetchCoinDetail(coinId: coin.id)
+        let coinDetailPublisher = coinGeckoApi
+            .fetchCoinDetail(coinId: coin.id)
             .catch { [weak self] error -> Empty<CoinDetailModel, Never> in
                 self?.error = error
                 return Empty(completeImmediately: true)
             }
+            .eraseToAnyPublisher()
+         
+        
+        coinDetailPublisher
             .combineLatest($coin)
             .map { [weak self] (coinDetail, coin) -> (overviewsStatistics: [StatisticModel], additionalStatistics: [StatisticModel]) in
                 guard let self else { return ([], []) }
@@ -36,6 +44,14 @@ class CoinDetailViewModel: BaseViewModel {
                 self?.overviewStatistics = data.overviewsStatistics
                 self?.additionalStatistics = data.additionalStatistics
             }
+            .store(in: &cancellables)
+        
+        coinDetailPublisher
+            .sink(receiveValue: { [weak self] detail in
+                self?.coinDescription = detail.description.en
+                self?.homepageUrl = detail.links?.homepage?.first
+                self?.redditUrl = detail.links?.subredditUrl
+            })
             .store(in: &cancellables)
     }
     

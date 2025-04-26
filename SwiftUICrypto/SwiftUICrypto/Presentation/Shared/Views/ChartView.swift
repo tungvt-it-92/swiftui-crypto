@@ -31,9 +31,14 @@ struct ChartView: View {
                     chartHorizontalAxisView
                         
                 )
-                .overlay(chartHorizontalAxisLabelsView, alignment: .leading)
+                .overlay(
+                    chartHorizontalAxisLabelsView
+                        .padding(.horizontal, 5),
+                    alignment: .leading
+                )
             
             chartDateLabelsView
+                .padding(.horizontal, 5)
         }
         .font(.caption)
         .foregroundStyle(Color.theme.secondaryTextColor)

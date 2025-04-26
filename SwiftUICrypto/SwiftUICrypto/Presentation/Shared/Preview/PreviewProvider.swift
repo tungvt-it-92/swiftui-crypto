@@ -42,7 +42,7 @@ let previewCoin = CoinModel(
     id: "bitcoin",
     symbol: "BTC",
     name: "Bitcoin",
-    marketCapRank: 1, 
+    marketCapRank: 1,
     image: "https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400",
     currentPrice: 65000.75,
     marketCap: 1_283_456_789_123,
@@ -246,7 +246,11 @@ let previewCoinDetailModel = CoinDetailModel(
     id: "bitcoin",
     symbol: "btc",
     name: "Bitcoin",
-    description: Description(en: "Bitcoin is a decentralized digital currency, without a central bank or single administrator."),
+    description: Description(
+        en: """
+        Bitcoin is the first successful internet money based on peer-to-peer technology; whereby no central bank or authority is involved in the transaction and production of the Bitcoin currency. It was created by an anonymous individual/group under the name, Satoshi Nakamoto. The source code is available publicly as an open source project, anybody can look at it and be part of the developmental process.\r\n\r\nBitcoin is changing the way we see money as we speak. The idea was to produce a means of exchange, independent of any central authority, that could be transferred electronically in a secure, verifiable and immutable way. It is a decentralized peer-to-peer internet currency making mobile payment easy, very low transaction fees, protects your identity, and it works anywhere all the time with no central authority and banks.\r\n\r\nBitcoin is designed to have only 21 million BTC ever created, thus making it a deflationary currency. Bitcoin uses the SHA-256 hashing algorithm with an average transaction confirmation time of 10 minutes. Miners today are mining Bitcoin using ASIC chip dedicated to only mining Bitcoin, and the hash rate has shot up to peta hashes.\r\n\r\nBeing the first successful online cryptography currency, Bitcoin has inspired other alternative currencies such as Litecoin, Peercoin, Primecoin, and so on.\r\n\r\nThe cryptocurrency then took off with the innovation of the turing-complete smart contract by Ethereum which led to the development of other amazing projects such as EOS, Tron, and even crypto-collectibles such as CryptoKitties.
+        """
+    ),
     image: ImageInfo(large: "https://example.com/bitcoin-large.png"),
     categories: ["Cryptocurrency", "Blockchain"],
     links: Link(homepage: ["https://bitcoin.org"], subredditUrl: "https://reddit.com/r/Bitcoin"),
