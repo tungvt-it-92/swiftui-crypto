@@ -8,6 +8,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var showPortfolio: Bool = false
     @State private var showEditPortfolio: Bool = false
+    @State private var showSetting: Bool = false
     @State private var presentedDetailCoin: CoinModel?
     @EnvironmentObject private var homeVM: HomeViewModel
     
@@ -49,6 +50,9 @@ struct HomeView: View {
         .sheet(isPresented: $showEditPortfolio) {
             EditPortfolioView()
         }
+        .sheet(isPresented: $showSetting) {
+            SettingView()
+        }
         .navigationDestination(item: $presentedDetailCoin, destination: { coin in
             return CoinDetailView(coin: coin)
         })
@@ -63,6 +67,8 @@ extension HomeView {
             CircleButton(iconName: showPortfolio ? "plus" : "info") {
                 if showPortfolio {
                     showEditPortfolio.toggle()
+                } else {
+                    showSetting.toggle()
                 }
             }
             .background {
