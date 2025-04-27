@@ -5,8 +5,14 @@
 
 import SwiftUI
 
+enum ShowCoinListType {
+    case all
+    case portfolio
+    case favorite
+}
+
 struct HomeView: View {
-    @State private var showPortfolio: Bool = false
+    @State private var showCoinListType: ShowCoinListType = .all
     @State private var showEditPortfolio: Bool = false
     @State private var showSetting: Bool = false
     @State private var presentedDetailCoin: CoinModel?
@@ -23,24 +29,28 @@ struct HomeView: View {
                 
                 StatisticView(
                     statisticModels: homeVM.statistics,
-                    showPortfolioColumn: showPortfolio
+                    showPortfolioColumn: showCoinListType == .portfolio
                 )
                 
                 searchView
                 
                 tableHeaderView
                 
-                if !showPortfolio {
+                if showCoinListType == .all {
                     allCoinList
                 }
                 
-                if showPortfolio {
+                if showCoinListType == .portfolio {
                     portfolioCoinList
+                }
+                
+                if showCoinListType == .favorite {
+                    favoriteCoinList
                 }
                 
                 Spacer(minLength: 0)
             }
-            .animation(.easeInOut(duration: 0.3), value: showPortfolio)
+            .animation(.easeInOut(duration: 0.3), value: showCoinListType)
             .padding(.horizontal)
         }
         .onAppear {
@@ -64,30 +74,50 @@ struct HomeView: View {
 extension HomeView {
     private var headerView: some View {
         HStack {
-            CircleButton(iconName: showPortfolio ? "plus" : "info") {
-                if showPortfolio {
-                    showEditPortfolio.toggle()
+            Group {
+                if showCoinListType != .favorite {
+                    CircleButton(iconName: showCoinListType == .portfolio ? "plus" : "info") {
+                        if showCoinListType == .portfolio {
+                            showEditPortfolio.toggle()
+                        } else {
+                            showSetting.toggle()
+                        }
+                    }
+                    .background {
+                        AnimatedCircleView(isAnimating: showCoinListType == .portfolio)
+                    }
                 } else {
-                    showSetting.toggle()
+                    CircleButton(iconName: "chevron.left") {
+                        showCoinListType = .all
+                    }
                 }
             }
-            .background {
-                AnimatedCircleView(isAnimating: showPortfolio)
-            }
+            
             
             Spacer()
             
-            Text(showPortfolio ? "Portfolio" : "Live Prices")
+            Text(showCoinListType == .all ? "All Coins" : showCoinListType == .portfolio ? "Portfolio" : "Favorites")
                 .font(.headline)
                 .fontWeight(.heavy)
                 .foregroundStyle(Color.theme.accentColor)
             
             Spacer()
             
+           
+
+            
             CircleButton(iconName: "chevron.right") {
-                showPortfolio.toggle()
+                let current = showCoinListType
+                switch current {
+                case .all:
+                    showCoinListType = .favorite
+                case .favorite:
+                    showCoinListType = .portfolio
+                case .portfolio:
+                    showCoinListType = .favorite
+                }
             }
-            .rotationEffect(Angle(degrees: showPortfolio ? 180 : 0))
+            .rotationEffect(Angle(degrees: showCoinListType == .portfolio ? 180 : 0))
         }
     }
     
@@ -115,6 +145,18 @@ extension HomeView {
         .transition(.move(edge: .trailing))
     }
     
+    private var favoriteCoinList: some View {
+        List(homeVM.favoriteCoins, id: \.id) { coin in
+            CoinItemView(coin: coin, showHoldingColumn: false) {
+                presentedDetailCoin = coin
+            }
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        }
+        .listRowSpacing(5)
+        .listStyle(.plain)
+        .transition(.move(edge: .trailing))
+    }
+    
     private var tableHeaderView: some View {
         HStack(spacing: 0) {
             HStack {
@@ -131,7 +173,7 @@ extension HomeView {
             
             Spacer()
             
-            if showPortfolio {
+            if showCoinListType == .portfolio {
                 HStack {
                     Text("Holdings")
                     Image(systemName: "chevron.down")

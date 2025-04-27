@@ -5,18 +5,11 @@
 import Foundation
 import CoreData
 
-class PortfolioRepository {
+class PortfolioRepository: BaseRepository {
     @Published var savedCoins: [PortfolioCoinEntity] = []
-    private let container: NSPersistentContainer
-    private let containerName: String = "PortfolioContainer"
 
-    init() {
-        container = NSPersistentContainer(name: containerName)
-        container.loadPersistentStores { (_, error) in
-            if let error = error {
-                MyLogger.debugLog("PortfolioRepository init error: \(error)")
-            }
-        }
+    override init() {
+        super.init()
         loadPortfolio()
     }
     

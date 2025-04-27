@@ -11,6 +11,7 @@ struct AnimatedCircleView: View {
     let scaleTo: Double
     let opacityFrom: Double
     let opacityTo: Double
+    @State var internalIsAnimating: Bool
     
     init(
         isAnimating: Bool,
@@ -24,29 +25,32 @@ struct AnimatedCircleView: View {
         self.scaleTo = scaleTo
         self.opacityFrom = opacityFrom
         self.opacityTo = opacityTo
+        internalIsAnimating = !isAnimating
     }
     
     var body: some View {
         Circle()
             .stroke(lineWidth: 3.0)
-            .scaleEffect(isAnimating ? scaleTo : scaleFrom, anchor: .center)
-            .opacity(isAnimating ? opacityTo : opacityFrom)
+            .scaleEffect(internalIsAnimating ? scaleTo : scaleFrom, anchor: .center)
+            .opacity(internalIsAnimating ? opacityTo : opacityFrom)
             .animation(
-                isAnimating ? .spring : nil,
-                value: isAnimating
+                internalIsAnimating ? .spring : nil,
+                value: internalIsAnimating
             )
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    internalIsAnimating.toggle()
+                }
+            }
     }
 }
 
 #Preview {
     struct PreviewWrapper: View {
-        @State var isAnimating = false
+        @State var isAnimating = true
         
         var body: some View {
             AnimatedCircleView(isAnimating: isAnimating)
-                .onAppear {
-                    isAnimating.toggle()
-            }
         }
     }
     

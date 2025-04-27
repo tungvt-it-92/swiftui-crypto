@@ -73,7 +73,8 @@ struct CoinModel: Identifiable, Codable, Hashable {
     init(
         coin: CoinModel,
         currentHolding: Double? = nil,
-        currentHoldingValue: Double? = nil
+        currentHoldingValue: Double? = nil,
+        favorite: Bool = false
     ){
         self.id = coin.id
         self.symbol = coin.symbol
@@ -102,7 +103,7 @@ struct CoinModel: Identifiable, Codable, Hashable {
         self.roi = coin.roi
         self.lastUpdated = coin.lastUpdated
         self.sparklineIn7d = coin.sparklineIn7d
-        self.favorite = coin.favorite
+        self.favorite = favorite
         self.currentHolding = currentHolding
         self.currentHoldingValue = currentHoldingValue
     }
