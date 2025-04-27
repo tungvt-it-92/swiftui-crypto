@@ -14,12 +14,13 @@ struct CircleButton: View {
             .font(.headline)
             .foregroundStyle(Color.theme.accentColor)
             .frame(width: 50, height: 50)
-            .onTapGesture {
-                action()
-            }
             .background {                   
                 Circle()
                     .foregroundStyle(Color.theme.background)
+            }
+            .contentShape(Circle())
+            .onTapGesture {
+                action()
             }
             .shadow(
                 color: Color.theme.accentColor.opacity(0.3),

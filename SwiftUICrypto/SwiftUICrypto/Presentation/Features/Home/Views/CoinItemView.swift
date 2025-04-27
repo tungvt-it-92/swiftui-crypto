@@ -9,6 +9,7 @@ struct CoinItemView: View {
     let coin: CoinModel
     let showHoldingColumn: Bool
     let onTapGestureAction: (() -> Void)?
+    @EnvironmentObject private var homeVM: HomeViewModel
     
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
@@ -58,6 +59,9 @@ struct CoinItemView: View {
             Image(systemName: coin.favorite == true ? "star.fill" : "star")
                 .foregroundStyle(Color.theme.accentColor)
                 .frame(width: 30, height: 30)
+                .onTapGesture {
+                    homeVM.toggleFavorite(coin: coin)
+                }
         }
         .contentShape(Rectangle())
         .onTapGesture {

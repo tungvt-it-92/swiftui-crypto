@@ -20,20 +20,23 @@ enum SortCoinOption {
 class HomeViewModel: BaseViewModel {
     @Published var filteredCoins: [CoinModel] = []
     @Published var portfolioCoins: [CoinModel] = []
+    @Published var favoriteCoins: [CoinModel] = []
     @Published var inputSearchText: String = ""
     @Published var statistics: [StatisticModel] = []
     @Published var sortOption: SortCoinOption = .rank
     @Published private var marketData: MarketData?
     
-    private var allCoins: [CoinModel] = []
+    @Published private var allCoins: [CoinModel] = []
     private var coinGeckoApi: CoinGeckoApiProtocol = CoinGeckoApi()
     private var portfolioRepository = PortfolioRepository()
+    private var favoriteCoinRepository = FavoriteCoinRepository()
     
     override init() {
         super.init()
         listenSearchKeyChanged()
         listenPortfolioUpdated()
         listenMarketDataUpdated()
+        listenFavoriteCoinsUpdated()
     }
     
     // MARK: PUBLIC
@@ -41,43 +44,30 @@ class HomeViewModel: BaseViewModel {
     func fetchCoins() {
         coinGeckoApi
             .fetchCoins()
-            .map { coins in
-                coins.map { coin in
-                    var newCoin = coin
-                    newCoin.favorite = Int.random(in: 1 ..< 10) < 3
-                    return newCoin
-                }
+            .catch { [weak self] error -> AnyPublisher<[CoinModel], Never> in
+                self?.error = error
+                return Just<[CoinModel]>([])
+                    .eraseToAnyPublisher()
             }
-            .sink { [weak self] completion in
-                switch completion {
-                case .finished:
-                    MyLogger.debugLog("FetchCoins FINISHED")
-                case let .failure(error):
-                    MyLogger.debugLog("ERROR \(error.localizedDescription)")
-                    self?.error = error
-                }
-            } receiveValue: { [weak self] coins in
+            .combineLatest(favoriteCoinRepository.$favoriteCoins)
+            .map(mapFavoriteCoins)
+            .sink(receiveValue: { [weak self] coins in
                 self?.allCoins = coins
                 self?.filteredCoins = coins
-            }
+            })
             .store(in: &cancellables)
     }
     
     func fetchMarketData() {
         coinGeckoApi
             .fetchMarketData()
-            .sink { [weak self] completion in
-                switch completion {
-                case .finished:
-                    self?.isLoading = false
-                    MyLogger.debugLog("fetchMarketData FINISHED")
-                case let .failure(error):
-                    MyLogger.debugLog("ERROR \(error.localizedDescription)")
-                    self?.error = error
-                }
-            } receiveValue: { [weak self] marketData in
-                self?.marketData = marketData.data
+            .catch { [weak self] error -> Empty<MarketDataModel, Never> in
+                self?.error = error
+                return Empty(completeImmediately: true)
             }
+            .sink(receiveValue: { [weak self] marketData in
+                self?.marketData = marketData.data
+            })
             .store(in: &cancellables)
     }
     
@@ -92,16 +82,24 @@ class HomeViewModel: BaseViewModel {
         HapticFeedback.notify(type: .success)
     }
     
+    func toggleFavorite(coin: CoinModel) {
+        if coin.favorite == true {
+            favoriteCoinRepository.deleteCoin(coinID: coin.id)
+        } else {
+            favoriteCoinRepository.addCoin(coin: coin)
+        }
+    }
+    
     // MARK: PRIVATE
     
     private func listenSearchKeyChanged() {
         $inputSearchText
             .debounce(for: .seconds(0.3), scheduler: DispatchQueue.main)
-            .combineLatest($sortOption)
-            .map { [weak self] (searchKey, option) -> [CoinModel] in
+            .combineLatest($allCoins, $sortOption)
+            .map { [weak self] (searchKey, allCoins, option) -> [CoinModel] in
                 guard let self = self else { return [] }
                 
-                let filteredCoins = filterCoins(filterKey: searchKey, coins: self.allCoins)
+                let filteredCoins = filterCoins(filterKey: searchKey, coins: allCoins)
                 
                 return sortCoins(sortOption: option, coins: filteredCoins)
             }
@@ -124,7 +122,8 @@ class HomeViewModel: BaseViewModel {
                     return CoinModel(
                         coin: coin,
                         currentHolding: coinEntity.amount,
-                        currentHoldingValue: coinEntity.amount * coin.currentPrice.valueOrZero()
+                        currentHoldingValue: coinEntity.amount * coin.currentPrice.valueOrZero(),
+                        favorite: coin.favorite ?? false
                     )
                 }
                 return self.sortPortfolioCoins(sortOption: option, coins: portfolioCoins)
@@ -132,7 +131,22 @@ class HomeViewModel: BaseViewModel {
             .sink { [weak self] coins in
                 guard let self = self else { return }
                 
-                portfolioCoins = coins//sortPortfolioCoins(sortOption: sortOption, coins: coins)
+                portfolioCoins = coins
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func listenFavoriteCoinsUpdated() {
+        $filteredCoins
+            .combineLatest($sortOption)
+            .map { [weak self] (coins, option) -> [CoinModel] in
+                guard let self = self else { return [] }
+                let favoriteCoins = coins.filter { $0.favorite == true }
+                
+                return self.sortCoins(sortOption: option, coins: favoriteCoins)
+            }
+            .sink { [weak self] coins in
+                self?.favoriteCoins = coins
             }
             .store(in: &cancellables)
     }
@@ -156,7 +170,9 @@ class HomeViewModel: BaseViewModel {
                     }
                     .reduce(0, +)
                 
-                let portfolioPercentageChange = ((portfolioCurrentValue - portfolioPreviousValues) / portfolioPreviousValues) * 100
+                let portfolioPercentageChange = portfolioPreviousValues > 0
+                                                ? ((portfolioCurrentValue - portfolioPreviousValues) / portfolioPreviousValues) * 100
+                                                : nil
                 
                 statistics = [
                     StatisticModel(
@@ -222,5 +238,17 @@ class HomeViewModel: BaseViewModel {
         }
         
         return coins
+    }
+    
+    private func mapFavoriteCoins(coins: [CoinModel], favoriteCoinEntities: [FavoriteCoinEntity]) -> [CoinModel] {
+        let favoriteCoinById = Dictionary(uniqueKeysWithValues: favoriteCoinEntities.map { ($0.coinID, $0) })
+        
+        return coins.map { coin -> CoinModel in
+            if favoriteCoinById[coin.id] != nil {
+                return  CoinModel(coin: coin, favorite: true)
+            }
+            
+            return coin
+        }
     }
 }
