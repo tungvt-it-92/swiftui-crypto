@@ -19,17 +19,10 @@ class CoinImageViewModel: ObservableObject, @unchecked Sendable {
         networkImageService = NetworkImageService();
     }
     
-    func fetchImage(imageUrl: String) {
+    func fetchImage(imageUrl: String) async {
         isFetchingImage = true
-        networkImageService
-            .downloadImage(imageUrl: imageUrl)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] completion in
-                self?.isFetchingImage = false
-            } receiveValue: { [weak self] image in
-                self?.image = image
-            }
-            .store(in: &cancellables)
-        
-    }   
+        image = await networkImageService
+            .downloadImageAsync(imageUrl: imageUrl)
+        isFetchingImage = false
+    }
 }

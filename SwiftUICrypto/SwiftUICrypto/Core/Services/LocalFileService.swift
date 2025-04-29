@@ -11,8 +11,8 @@ struct LocalFileService {
     
     private init() {}
     
-    func saveImage(image: UIImage, imageName: String, folderName: String) {
-        createFolderIfNotExist(folderName: folderName)
+    func saveImage(image: UIImage, imageName: String, folderName: String) async {
+        await createFolderIfNotExist(folderName: folderName)
         
         guard
             let data = image.pngData(),
@@ -31,7 +31,7 @@ struct LocalFileService {
         
     }
     
-    func getImage(folderName: String, imageName: String) -> UIImage? {
+    func getImage(folderName: String, imageName: String) async -> UIImage? {
         let imageKey = "\(folderName)/\(imageName)" as NSString
         if let image = cached.object(forKey: imageKey) {
             MyLogger.debugLog("LocalFileService: getImage: \(imageKey) from cached")
@@ -56,7 +56,7 @@ struct LocalFileService {
         return image
     }
     
-    private func createFolderIfNotExist(folderName: String) {
+    private func createFolderIfNotExist(folderName: String) async {
         guard let folderUrl = getFolderUrl(folderName: folderName) else {
             MyLogger.debugLog("LocalFileService: createFolderIfNotExist - Folder url not found")
             return

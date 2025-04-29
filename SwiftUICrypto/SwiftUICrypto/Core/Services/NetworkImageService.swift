@@ -5,12 +5,50 @@
 import UIKit
 import Combine
 
-struct NetworkImageService {
+extension AnyPublisher: @unchecked @retroactive Sendable where Output == UIImage?, Failure == Never {}
+
+struct NetworkImageService: @unchecked Sendable {
     let coinImagesFolder = "coinImages"
     
-    func downloadImage(imageUrl: String) -> AnyPublisher<UIImage?, Never> {
+    func downloadImageAsync(imageUrl: String) async -> UIImage? {
         let imageKey = imageUrl.sha256()
-        if let cachedImage = LocalFileService.shared.getImage(
+        if let cachedImage = await LocalFileService.shared.getImage(
+            folderName: coinImagesFolder,
+            imageName: imageKey
+        ) {
+            return cachedImage
+        }
+        
+        guard let url = URL(string: imageUrl) else {
+            return nil
+        }
+        
+        do {
+            let data = try await NetworkService()
+                .execute(endpointUrl: url)
+                .asyncValue()
+            
+            guard let image = UIImage(data: data) else {
+                return nil
+            }
+            
+            await LocalFileService.shared.saveImage(
+                image: image,
+                imageName: imageKey,
+                folderName: self.coinImagesFolder
+            )
+            
+            return image
+        } catch {
+            MyLogger.debugLog("Error downloading image: \(error)")
+            return nil
+        }
+    }
+    
+    @available(*, deprecated, message: "Use downloadImageAsync(imageUrl:) instead.")
+    func downloadImage(imageUrl: String) async -> AnyPublisher<UIImage?, Never> {
+        let imageKey = imageUrl.sha256()
+        if let cachedImage = await LocalFileService.shared.getImage(
             folderName: coinImagesFolder,
             imageName: imageKey
         ) {
@@ -29,12 +67,14 @@ struct NetworkImageService {
                 return UIImage(data: data)
             }
             .handleEvents(receiveOutput: { image in
-                if let `image` = image {
-                    LocalFileService.shared.saveImage(
-                        image: `image`,
-                        imageName: imageKey,
-                        folderName: self.coinImagesFolder
-                    )
+                Task {
+                    if let `image` = image {
+                        await LocalFileService.shared.saveImage(
+                            image: `image`,
+                            imageName: imageKey,
+                            folderName: self.coinImagesFolder
+                        )
+                    }
                 }
             })
             .catch { error in
