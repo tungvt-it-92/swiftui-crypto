@@ -67,6 +67,9 @@ struct HomeView: View {
             return CoinDetailView(coin: coin)
         })
         .alert(isPresented: $homeVM.isShowError, error: homeVM.error) {}
+        .onDisappear {
+            UIApplication.shared.endEditing()
+        }
     }
 }
 
@@ -102,10 +105,7 @@ extension HomeView {
                 .foregroundStyle(Color.theme.accentColor)
             
             Spacer()
-            
-           
-
-            
+  
             CircleButton(iconName: "chevron.right") {
                 let current = showCoinListType
                 switch current {
@@ -131,6 +131,9 @@ extension HomeView {
         .listRowSpacing(5)
         .listStyle(.plain)
         .transition(.move(edge: .leading))
+        .onAppear {
+            UIApplication.shared.endEditing()
+        }
     }
     
     private var portfolioCoinList: some View {
@@ -143,6 +146,9 @@ extension HomeView {
         .listRowSpacing(5)
         .listStyle(.plain)
         .transition(.move(edge: .trailing))
+        .onAppear {
+            UIApplication.shared.endEditing()
+        }
     }
     
     private var favoriteCoinList: some View {
@@ -155,6 +161,9 @@ extension HomeView {
         .listRowSpacing(5)
         .listStyle(.plain)
         .transition(.move(edge: .trailing))
+        .onAppear {
+            UIApplication.shared.endEditing()
+        }
     }
     
     private var tableHeaderView: some View {

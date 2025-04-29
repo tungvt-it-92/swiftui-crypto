@@ -17,6 +17,7 @@ enum SortCoinOption {
     case priceReversed
 }
 
+@MainActor
 class HomeViewModel: BaseViewModel {
     @Published var filteredCoins: [CoinModel] = []
     @Published var portfolioCoins: [CoinModel] = []

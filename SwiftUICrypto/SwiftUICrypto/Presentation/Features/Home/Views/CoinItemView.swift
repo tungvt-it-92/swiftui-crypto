@@ -61,6 +61,7 @@ struct CoinItemView: View {
                 .frame(width: 30, height: 30)
                 .onTapGesture {
                     homeVM.toggleFavorite(coin: coin)
+                    UIApplication.shared.endEditing()
                 }
         }
         .contentShape(Rectangle())

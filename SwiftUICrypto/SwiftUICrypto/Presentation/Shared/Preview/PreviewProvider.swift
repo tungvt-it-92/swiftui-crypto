@@ -6,9 +6,9 @@
 import Foundation
 
 // Helper for ISO 8601 dates
-private let isoFormatter = ISO8601DateFormatter()
+@MainActor private let isoFormatter = ISO8601DateFormatter()
 
-let previewMarketData = MarketData(
+@MainActor let previewMarketData = MarketData(
     activeCryptocurrencies: 17055,
     upcomingIcos: 0,
     ongoingIcos: 49,
@@ -32,13 +32,13 @@ let previewMarketData = MarketData(
     updatedAt: 1744547615
 )
 
-let previewStatistics: [StatisticModel] = [
+@MainActor let previewStatistics: [StatisticModel] = [
     StatisticModel(title: "Total Market Cap", value: "2772501357230.9385"),
     StatisticModel(title: "Total Volume", value: "86060972486.3061", percentageChange: -1.5),
     StatisticModel(title: "Market Cap Change 24h", value: "10234567", percentageChange: 5.05)
 ]
 
-let previewCoin = CoinModel(
+@MainActor let previewCoin = CoinModel(
     id: "bitcoin",
     symbol: "BTC",
     name: "Bitcoin",
@@ -242,7 +242,7 @@ let previewCoin = CoinModel(
     currentHoldingValue: 10000000
 )
 
-let previewCoinDetailModel = CoinDetailModel(
+@MainActor let previewCoinDetailModel = CoinDetailModel(
     id: "bitcoin",
     symbol: "btc",
     name: "Bitcoin",
@@ -258,6 +258,7 @@ let previewCoinDetailModel = CoinDetailModel(
     blockTimeInMinutes: 10.0
 )
 
+@MainActor
 struct PreviewDataProvider {
     static let shared = PreviewDataProvider()
     

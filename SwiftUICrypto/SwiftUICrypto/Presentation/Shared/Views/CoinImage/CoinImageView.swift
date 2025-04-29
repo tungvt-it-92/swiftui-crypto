@@ -22,15 +22,15 @@ struct CoinImageView: View {
                         Image(uiImage: dowloadedImage)
                             .resizable()
                     } else {
-                        Image(systemName: "questionmark.circle.dashed")
+                        Image(systemName: "questionmark")
                             .resizable()
                     }
                 }
             }
         }
         .onAppear {
-            if let imageUrl = coin.image {
-                coinImageVM.fetchImage(imageUrl: imageUrl)
+                if let imageUrl = coin.image {
+                    coinImageVM.fetchImage(imageUrl: imageUrl)
             }
         }
     }
