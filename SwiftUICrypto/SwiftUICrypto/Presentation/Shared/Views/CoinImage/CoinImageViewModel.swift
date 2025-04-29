@@ -7,7 +7,8 @@ import Foundation
 import UIKit
 import Combine
 
-class CoinImageViewModel: ObservableObject {
+@MainActor
+class CoinImageViewModel: ObservableObject, @unchecked Sendable {
     @Published var image: UIImage?
     @Published var isFetchingImage: Bool = false
     
@@ -20,7 +21,9 @@ class CoinImageViewModel: ObservableObject {
     
     func fetchImage(imageUrl: String) {
         isFetchingImage = true
-        networkImageService.downloadImage(imageUrl: imageUrl)
+        networkImageService
+            .downloadImage(imageUrl: imageUrl)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 self?.isFetchingImage = false
             } receiveValue: { [weak self] image in

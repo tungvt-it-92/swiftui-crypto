@@ -5,9 +5,8 @@
 import Foundation
 import UIKit
 
-
 struct LocalFileService {
-    static let shared = LocalFileService()
+    nonisolated(unsafe) static let shared = LocalFileService()
     private let cached = NSCache<NSString, UIImage>()
     
     private init() {}

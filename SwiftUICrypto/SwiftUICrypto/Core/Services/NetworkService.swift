@@ -48,7 +48,6 @@ struct NetworkService {
                 
                 return output.data
             }
-            .receive(on: DispatchQueue.main)
 #if DEBUG
             .print()
 #endif
@@ -61,6 +60,7 @@ struct NetworkService {
         cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy
     ) -> AnyPublisher<T, APIError> {
         return execute(endpointUrl: endpointUrl, cachePolicy: cachePolicy)
+            .subscribe(on: DispatchQueue.global(qos: .default))
             .decode(type: T.self, decoder: jsonDecoder)
             .mapError { error in
                 switch error {
@@ -88,6 +88,7 @@ struct NetworkService {
                     return .unknown
                 }
             }
+            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 }

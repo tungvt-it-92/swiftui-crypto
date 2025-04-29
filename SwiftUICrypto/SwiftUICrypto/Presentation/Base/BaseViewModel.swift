@@ -5,6 +5,7 @@
 
 import Combine
 
+@MainActor
 class BaseViewModel: ObservableObject {
     var cancellables = Set<AnyCancellable>()
     var error: APIError? {

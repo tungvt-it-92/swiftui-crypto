@@ -10,7 +10,6 @@ struct NetworkImageService {
     
     func downloadImage(imageUrl: String) -> AnyPublisher<UIImage?, Never> {
         let imageKey = imageUrl.sha256()
-        
         if let cachedImage = LocalFileService.shared.getImage(
             folderName: coinImagesFolder,
             imageName: imageKey

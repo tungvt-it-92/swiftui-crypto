@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 struct HapticFeedback {
     static private var hapticFeedbackGenerator = UINotificationFeedbackGenerator()
     
