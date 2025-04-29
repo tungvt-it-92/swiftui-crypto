@@ -29,8 +29,10 @@ struct CoinImageView: View {
             }
         }
         .onAppear {
+            Task {
                 if let imageUrl = coin.image {
-                    coinImageVM.fetchImage(imageUrl: imageUrl)
+                    await coinImageVM.fetchImage(imageUrl: imageUrl)
+                }
             }
         }
     }
