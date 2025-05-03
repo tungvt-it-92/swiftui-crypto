@@ -15,8 +15,13 @@ class CoinImageViewModel: ObservableObject, @unchecked Sendable {
     private var cancellables = Set<AnyCancellable>()
     private var networkImageService: NetworkImageService
     
-    init() {
-        networkImageService = NetworkImageService();
+    init(coin: CoinModel) {
+        networkImageService = NetworkImageService()
+        Task {
+            if let imageUrlString = coin.image {
+                await fetchImage(imageUrl: imageUrlString)
+            }
+        }
     }
     
     func fetchImage(imageUrl: String) async {

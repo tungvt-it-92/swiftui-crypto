@@ -25,8 +25,8 @@ class HomeViewModel: BaseViewModel {
     @Published var inputSearchText: String = ""
     @Published var statistics: [StatisticModel] = []
     @Published var sortOption: SortCoinOption = .rank
-    @Published private var marketData: MarketData?
     
+    @Published private var marketData: MarketData?
     @Published private var originalCoins: [CoinModel] = []
     private var coinGeckoApi: CoinGeckoApiProtocol = CoinGeckoApi()
     private var portfolioRepository = PortfolioRepository()
@@ -62,8 +62,8 @@ class HomeViewModel: BaseViewModel {
                 return originalCoins + newSyncCoins + newSearchCoins
             }
             .combineLatest(favoriteCoinRepository.$favoriteCoins)
-            .map(mapFavoriteCoins)
             .print("fetchCoins")
+            .map(mapFavoriteCoins)
             .removeDuplicates()
             .sink(receiveValue: { [weak self] coins in
                 self?.originalCoins = coins
@@ -123,6 +123,7 @@ class HomeViewModel: BaseViewModel {
     
     private func listenSearchKeyChanged() {
         $inputSearchText
+            .removeDuplicates()
             .combineLatest($originalCoins, $sortOption)
             .map { [weak self] (searchKey, allCoins, option) -> [CoinModel] in
                 guard let self = self else { return [] }
@@ -139,6 +140,7 @@ class HomeViewModel: BaseViewModel {
     
     private func searchRemoteCoins() -> AnyPublisher<[CoinModel], Never> {
         $inputSearchText
+            .removeDuplicates()
             .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
             .map { queryString -> AnyPublisher<[CoinModel], Never> in
                 if queryString.isBlank {
