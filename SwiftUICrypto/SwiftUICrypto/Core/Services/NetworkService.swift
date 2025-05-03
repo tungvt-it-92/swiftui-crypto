@@ -115,7 +115,7 @@ struct NetworkService {
             case .keyNotFound(_, let context):
                 errorMsg = "DecodingError keyNotFound \(context.debugDescription) \(context.codingPath) \(String(describing: context.underlyingError))"
             case .dataCorrupted(let context):
-                errorMsg = "DecodingError valueNotFound  \(context.debugDescription) \(context.codingPath) \(String(describing: context.underlyingError))"
+                errorMsg = "DecodingError dataCorrupted  \(context.debugDescription) \(context.codingPath) \(String(describing: context.underlyingError))"
             default:
                 errorMsg = decodeError.localizedDescription
             }

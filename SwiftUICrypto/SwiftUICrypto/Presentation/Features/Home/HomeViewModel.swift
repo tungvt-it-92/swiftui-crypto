@@ -43,19 +43,48 @@ class HomeViewModel: BaseViewModel {
     // MARK: PUBLIC
     func fetchCoins() {
         coinGeckoApi
-            .fetchCoins(page: 1)
+            .fetchCoins(ids: nil)
             .catch { [weak self] error -> AnyPublisher<[CoinModel], Never> in
                 self?.error = error
                 return Empty(completeImmediately: true)
                     .eraseToAnyPublisher()
             }
+            .combineLatest(syncLocalCoinsWithRemote(), searchRemoteCoins())
+            .map { [weak self] (originalCoins, syncCoins, searchRemoteCoins) -> [CoinModel] in
+                guard self != nil else { return [] }
+                let newSyncCoins = syncCoins.filter { coin in
+                    !originalCoins.contains(where: { $0.id == coin.id })
+                }
+                let newSearchCoins = searchRemoteCoins.filter { coin in
+                    !originalCoins.contains(where: { $0.id == coin.id }) &&
+                    !syncCoins.contains(where: { $0.id == coin.id })
+                }
+                return originalCoins + newSyncCoins + newSearchCoins
+            }
             .combineLatest(favoriteCoinRepository.$favoriteCoins)
             .map(mapFavoriteCoins)
             .print("fetchCoins")
+            .removeDuplicates()
             .sink(receiveValue: { [weak self] coins in
                 self?.originalCoins = coins
             })
             .store(in: &cancellables)
+    }
+    
+    func syncLocalCoinsWithRemote() -> AnyPublisher<[CoinModel], Never> {
+        let localCoinIDs = Set(favoriteCoinRepository.favoriteCoins.map(\.coinID))
+            .union(portfolioRepository.savedCoins.map(\.coinID))
+        
+        let idsList = Array(localCoinIDs).compactMap { $0 }
+        
+        guard !idsList.isEmpty else { return Just([]).eraseToAnyPublisher() }
+        
+        return coinGeckoApi.fetchCoins(ids: idsList)
+            .catch { [weak self] error -> AnyPublisher<[CoinModel], Never> in
+                self?.error = error
+                return Empty(completeImmediately: true).eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
     }
     
     func fetchMarketData() {
@@ -94,7 +123,6 @@ class HomeViewModel: BaseViewModel {
     
     private func listenSearchKeyChanged() {
         $inputSearchText
-            .debounce(for: .seconds(0.3), scheduler: DispatchQueue.main)
             .combineLatest($originalCoins, $sortOption)
             .map { [weak self] (searchKey, allCoins, option) -> [CoinModel] in
                 guard let self = self else { return [] }
@@ -107,6 +135,23 @@ class HomeViewModel: BaseViewModel {
                 self?.filteredCoins = returnedCoins
             }
             .store(in: &cancellables)
+    }
+    
+    private func searchRemoteCoins() -> AnyPublisher<[CoinModel], Never> {
+        $inputSearchText
+            .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
+            .map { queryString -> AnyPublisher<[CoinModel], Never> in
+                if queryString.isBlank {
+                    return Just([]).eraseToAnyPublisher()
+                }
+                
+                return self.coinGeckoApi.searchCoin(query: queryString)
+                    .print("searchRemoteCoins")
+                    .replaceError(with: [])
+                    .eraseToAnyPublisher()
+            }
+            .switchToLatest()
+            .eraseToAnyPublisher()
     }
     
     private func listenPortfolioUpdated() {
@@ -212,9 +257,9 @@ class HomeViewModel: BaseViewModel {
         return coins.sorted { coin1, coin2 in
             switch sortOption {
             case .rank, .holdings:
-                return coin1.marketCapRank < coin2.marketCapRank
+                return (coin1.marketCapRank ?? 99999) < (coin2.marketCapRank ?? 99999)
             case .rankReversed, .holdingsReversed:
-                return coin1.marketCapRank > coin2.marketCapRank
+                return (coin1.marketCapRank ?? 0 ) > (coin2.marketCapRank ?? 0)
             case .change24h:
                 return coin1.high24h.valueOrZero() - coin1.low24h.valueOrZero() < coin2.high24h.valueOrZero() - coin2.low24h.valueOrZero()
             case .change24hReversed:

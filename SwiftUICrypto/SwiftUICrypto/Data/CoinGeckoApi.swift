@@ -6,15 +6,17 @@ import Combine
 import Foundation
 
 protocol CoinGeckoApiProtocol {
-    func fetchCoins(page: Int) -> AnyPublisher<[CoinModel], APIError>
+    func fetchCoins(ids: [String]?) -> AnyPublisher<[CoinModel], APIError>
     func fetchMarketData() -> AnyPublisher<MarketDataModel, APIError>
     func fetchCoinDetail(coinId: String) -> AnyPublisher<CoinDetailModel, APIError>
+    func searchCoin(query: String) -> AnyPublisher<[CoinModel], APIError>
 }
 
 enum CoinGeckoApiEndpoint: NetworkUrlConvertible {
-    case coinList(page: Int = 1)
+    case coinList(ids: [String]? = nil)
     case marketData
     case coinDetail(coinId: String)
+    case searchCoin(queryString: String)
     
     func asURLRequest() ->URLRequest? {
         
@@ -65,18 +67,26 @@ enum CoinGeckoApiEndpoint: NetworkUrlConvertible {
             return "global"
         case .coinDetail(coinId: let id):
             return "coins/\(id)"
+        case .searchCoin(queryString: let query):
+            return "search?query=\(query)"
         }
     }
     
     private var queryItems: [String: Any]? {
         switch self {
-        case .coinList(let page):
-            return [
+        case .coinList(let ids):
+            var params: [String: Any] = [
                 "vs_currency": "usd",
-                "page": page,
-                "per_page": 250,
+                "page": 1,
+                "per_page": 100,
                 "sparkline": true
             ]
+            
+            if let ids = ids, !ids.isEmpty {
+                params["ids"] = ids.joined(separator: ",")
+            }
+            
+            return params
         case .coinDetail:
             return [
                 "localization": false,
@@ -102,10 +112,12 @@ struct CoinGeckoApi: CoinGeckoApiProtocol {
         jsonDecoder.dateDecodingStrategy = .formatted(dateFormatter)
     }
     
-    func fetchCoins(page: Int = 1) -> AnyPublisher<[CoinModel], APIError> {
+    func fetchCoins(ids: [String]? = nil) -> AnyPublisher<[CoinModel], APIError> {
         return NetworkService()
             .execute(
-                endpointUrl: CoinGeckoApiEndpoint.coinList(page: page),
+                endpointUrl: CoinGeckoApiEndpoint.coinList(
+                    ids: ids
+                ),
                 jsonDecoder: jsonDecoder
             )
     }
@@ -126,5 +138,27 @@ struct CoinGeckoApi: CoinGeckoApiProtocol {
                 jsonDecoder: jsonDecoder
             )
             .eraseToAnyPublisher()
+    }
+    
+    func searchCoin(query: String) -> AnyPublisher<[CoinModel], APIError> {
+        let searchPublisher: AnyPublisher<SearchResultEntity, APIError> = NetworkService()
+            .execute(
+                endpointUrl: CoinGeckoApiEndpoint.searchCoin(queryString: query),
+                jsonDecoder: jsonDecoder
+            )
+        return searchPublisher.flatMap { (searchResultEntity) -> AnyPublisher<[CoinModel], APIError> in
+            if searchResultEntity.coins.isEmpty {
+                return Just([])
+                    .setFailureType(to: APIError.self)
+                    .eraseToAnyPublisher()
+            }
+            
+            let ids = searchResultEntity.coins.map { $0.id }
+            return NetworkService().execute(
+                endpointUrl: CoinGeckoApiEndpoint.coinList(ids: ids),
+                jsonDecoder: jsonDecoder
+            )
+        }
+        .eraseToAnyPublisher()
     }
 }

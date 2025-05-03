@@ -82,7 +82,7 @@ extension EditPortfolioView {
     }
     
     private var coinList: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal, showsIndicators: true) {
             LazyHStack(spacing: 10) {
                 ForEach(
                     viewModel.inputSearchText.isEmpty
