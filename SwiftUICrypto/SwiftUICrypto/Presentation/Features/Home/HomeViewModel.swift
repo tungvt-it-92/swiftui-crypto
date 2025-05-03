@@ -27,7 +27,7 @@ class HomeViewModel: BaseViewModel {
     @Published var sortOption: SortCoinOption = .rank
     @Published private var marketData: MarketData?
     
-    @Published private var allCoins: [CoinModel] = []
+    @Published private var originalCoins: [CoinModel] = []
     private var coinGeckoApi: CoinGeckoApiProtocol = CoinGeckoApi()
     private var portfolioRepository = PortfolioRepository()
     private var favoriteCoinRepository = FavoriteCoinRepository()
@@ -41,20 +41,19 @@ class HomeViewModel: BaseViewModel {
     }
     
     // MARK: PUBLIC
-    
     func fetchCoins() {
         coinGeckoApi
-            .fetchCoins()
+            .fetchCoins(page: 1)
             .catch { [weak self] error -> AnyPublisher<[CoinModel], Never> in
                 self?.error = error
-                return Just<[CoinModel]>([])
+                return Empty(completeImmediately: true)
                     .eraseToAnyPublisher()
             }
             .combineLatest(favoriteCoinRepository.$favoriteCoins)
             .map(mapFavoriteCoins)
+            .print("fetchCoins")
             .sink(receiveValue: { [weak self] coins in
-                self?.allCoins = coins
-                self?.filteredCoins = coins
+                self?.originalCoins = coins
             })
             .store(in: &cancellables)
     }
@@ -96,7 +95,7 @@ class HomeViewModel: BaseViewModel {
     private func listenSearchKeyChanged() {
         $inputSearchText
             .debounce(for: .seconds(0.3), scheduler: DispatchQueue.main)
-            .combineLatest($allCoins, $sortOption)
+            .combineLatest($originalCoins, $sortOption)
             .map { [weak self] (searchKey, allCoins, option) -> [CoinModel] in
                 guard let self = self else { return [] }
                 
@@ -172,8 +171,8 @@ class HomeViewModel: BaseViewModel {
                     .reduce(0, +)
                 
                 let portfolioPercentageChange = portfolioPreviousValues > 0
-                                                ? ((portfolioCurrentValue - portfolioPreviousValues) / portfolioPreviousValues) * 100
-                                                : nil
+                ? ((portfolioCurrentValue - portfolioPreviousValues) / portfolioPreviousValues) * 100
+                : nil
                 
                 statistics = [
                     StatisticModel(
@@ -204,7 +203,6 @@ class HomeViewModel: BaseViewModel {
             filterKey.isEmpty
             || $0.symbol.lowercased().contains(filterKey.lowercased())
             || $0.name.lowercased().contains(filterKey.lowercased())
-            || $0.id.lowercased().contains(filterKey.lowercased())
         }
         
         return filteredCoins

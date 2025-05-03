@@ -6,9 +6,89 @@ import Combine
 import Foundation
 
 protocol CoinGeckoApiProtocol {
-    func fetchCoins() -> AnyPublisher<[CoinModel], APIError>
+    func fetchCoins(page: Int) -> AnyPublisher<[CoinModel], APIError>
     func fetchMarketData() -> AnyPublisher<MarketDataModel, APIError>
     func fetchCoinDetail(coinId: String) -> AnyPublisher<CoinDetailModel, APIError>
+}
+
+enum CoinGeckoApiEndpoint: NetworkUrlConvertible {
+    case coinList(page: Int = 1)
+    case marketData
+    case coinDetail(coinId: String)
+    
+    func asURLRequest() ->URLRequest? {
+        
+        guard let url = buildUrl() else {
+            return nil
+        }
+        
+        var request  = URLRequest(url: url)
+        for (key, value) in header {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+        
+        return request
+    }
+    
+    private var header: [String : String] {
+        [
+            "Content-Type": "application/json",
+            "x-cg-demo-api-key": CoinGeckoApiConfigurationManager.apiKey
+        ]
+    }
+    
+    private func buildUrl() -> URL? {
+        let urlString = "\(CoinGeckoApiConfigurationManager.baseUrl)\(path)"
+        guard var uRLComponents = URLComponents(string: urlString) else {
+            return nil
+        }
+        
+        if let queryItems = queryItems {
+            uRLComponents.queryItems = []
+            queryItems.forEach { key, value in
+                uRLComponents.queryItems!.append(URLQueryItem(name: key, value: "\(value)"))
+            }
+        }
+        
+        guard let url = uRLComponents.url else {
+            return nil
+        }
+        
+        return url
+    }
+    
+    private var path: String {
+        switch self {
+        case .coinList:
+            return "coins/markets"
+        case .marketData:
+            return "global"
+        case .coinDetail(coinId: let id):
+            return "coins/\(id)"
+        }
+    }
+    
+    private var queryItems: [String: Any]? {
+        switch self {
+        case .coinList(let page):
+            return [
+                "vs_currency": "usd",
+                "page": page,
+                "per_page": 250,
+                "sparkline": true
+            ]
+        case .coinDetail:
+            return [
+                "localization": false,
+                "tickers": false,
+                "market_data": false,
+                "community_data": false,
+                "developer_data": false,
+                "sparkline": false
+            ]
+        default: return nil
+        }
+    }
 }
 
 struct CoinGeckoApi: CoinGeckoApiProtocol {
@@ -22,85 +102,29 @@ struct CoinGeckoApi: CoinGeckoApiProtocol {
         jsonDecoder.dateDecodingStrategy = .formatted(dateFormatter)
     }
     
-    func fetchCoins() -> AnyPublisher<[CoinModel], APIError> {
-       
-        buildEndpointUrl(
-            with: "coins/markets",
-            queryItems: [
-                "vs_currency": "usd",
-                "page": 1,
-                "per_page": 250,
-                "sparkline": true
-            ]
-        )
-        .flatMap { endpointUrl in
-            NetworkService()
-                .execute(
-                    endpointUrl: endpointUrl,
-                    jsonDecoder: jsonDecoder
-                )
-        }
-        .eraseToAnyPublisher()
+    func fetchCoins(page: Int = 1) -> AnyPublisher<[CoinModel], APIError> {
+        return NetworkService()
+            .execute(
+                endpointUrl: CoinGeckoApiEndpoint.coinList(page: page),
+                jsonDecoder: jsonDecoder
+            )
     }
     
     func fetchMarketData() -> AnyPublisher<MarketDataModel, APIError> {
-        buildEndpointUrl(with: "global")
-            .flatMap { url in
-                NetworkService()
-                    .execute(
-                        endpointUrl: url,
-                        jsonDecoder: jsonDecoder
-                    )
-            }
+        return NetworkService()
+            .execute(
+                endpointUrl: CoinGeckoApiEndpoint.marketData,
+                jsonDecoder: jsonDecoder
+            )
             .eraseToAnyPublisher()
     }
     
     func fetchCoinDetail(coinId: String) -> AnyPublisher<CoinDetailModel, APIError> {
-        buildEndpointUrl(
-            with: "coins/\(coinId)",
-            queryItems: [
-                "localization": false,
-                "tickers": false,
-                "market_data": false,
-                "community_data": false,
-                "developer_data": false,
-                "sparkline": false
-            ]
-        )
-        .flatMap { url in
-            NetworkService()
-                .execute(
-                    endpointUrl: url,
-                    jsonDecoder: jsonDecoder
-                )
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    private func buildEndpointUrl(
-        with path: String,
-        queryItems: [String: Any]? = nil
-    ) -> AnyPublisher<URL, APIError> {
-        let urlString = "\(baseUrl)\(path)"
-        guard var uRLComponents = URLComponents(string: urlString) else {
-            return Fail(error: APIError.urlInvalid)
-                .eraseToAnyPublisher()
-        }
-        
-        if let queryItems = queryItems {
-            uRLComponents.queryItems = []
-            queryItems.forEach { key, value in
-                uRLComponents.queryItems!.append(URLQueryItem(name: key, value: "\(value)"))
-            }
-        }
-        
-        guard let url = uRLComponents.url else {
-            return Fail(error: APIError.urlInvalid)
-                .eraseToAnyPublisher()
-        }
-        
-        return Just(url)
-            .setFailureType(to: APIError.self)
+        return NetworkService()
+            .execute(
+                endpointUrl: CoinGeckoApiEndpoint.coinDetail(coinId: coinId),
+                jsonDecoder: jsonDecoder
+            )
             .eraseToAnyPublisher()
     }
 }
