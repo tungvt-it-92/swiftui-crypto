@@ -10,11 +10,11 @@ struct CoinModel: Identifiable, Codable, Hashable {
         id: String,
         symbol: String,
         name: String,
-        marketCapRank: Int,
+        marketCapRank: Int? = nil,
         image: String? = nil,
         currentPrice: Double? = nil,
         marketCap: Double? = nil,
-        fullyDilutedValuation: Int64? = nil,
+        fullyDilutedValuation: Double? = nil,
         totalVolume: Double? = nil,
         high24h: Double? = nil,
         low24h: Double? = nil,
@@ -111,11 +111,11 @@ struct CoinModel: Identifiable, Codable, Hashable {
     let id: String
     let symbol: String
     let name: String
-    let marketCapRank: Int
+    let marketCapRank: Int?
     let image: String?
     let currentPrice: Double?
     let marketCap: Double?
-    let fullyDilutedValuation: Int64?
+    let fullyDilutedValuation: Double?
     let totalVolume: Double?
     let high24h: Double?
     let low24h: Double?

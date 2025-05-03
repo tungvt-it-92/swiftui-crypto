@@ -13,7 +13,7 @@ struct CoinItemView: View {
     
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
-            Text("#\(coin.marketCapRank)")
+            Text(coin.marketCapRank != nil ? "#\(coin.marketCapRank!)" : "N/A")
                 .bold()
                 .foregroundStyle(Color.theme.secondaryTextColor)
                 .frame(minWidth: 30)

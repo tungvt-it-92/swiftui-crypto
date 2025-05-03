@@ -17,6 +17,7 @@ struct HomeView: View {
     @State private var showSetting: Bool = false
     @State private var presentedDetailCoin: CoinModel?
     @EnvironmentObject private var homeVM: HomeViewModel
+    @State private var isFetchedData: Bool = false
     
     var body: some View {
         
@@ -54,8 +55,11 @@ struct HomeView: View {
             .padding(.horizontal)
         }
         .onAppear {
-            homeVM.fetchCoins()
-            homeVM.fetchMarketData()
+            if !isFetchedData {
+                isFetchedData = true
+                homeVM.fetchCoins()
+                homeVM.fetchMarketData()
+            }
         }
         .sheet(isPresented: $showEditPortfolio) {
             EditPortfolioView()
