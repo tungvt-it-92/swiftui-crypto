@@ -32,6 +32,7 @@ class CoinDetailViewModel: BaseViewModel {
         
         coinDetailPublisher
             .combineLatest($coin)
+            .print("fetchCoinDetail")
             .map { [weak self] (coinDetail, coin) -> (overviewsStatistics: [StatisticModel], additionalStatistics: [StatisticModel]) in
                 guard let self else { return ([], []) }
                 
@@ -112,7 +113,7 @@ class CoinDetailViewModel: BaseViewModel {
         
         let marketCapStatistic = StatisticModel(
             title: "Market Capitalization",
-            value: coin.marketCap.valueOrZero().asPercentageString(),
+            value: coin.marketCap.valueOrZero().formattedWithAbbreviations(),
             percentageChange: coin.marketCapChangePercentage24h
         )
         
