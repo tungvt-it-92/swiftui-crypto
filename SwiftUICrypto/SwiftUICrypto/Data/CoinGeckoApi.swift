@@ -113,13 +113,17 @@ struct CoinGeckoApi: CoinGeckoApiProtocol {
     }
     
     func fetchCoins(ids: [String]? = nil) -> AnyPublisher<[CoinModel], APIError> {
-        return NetworkService()
-            .execute(
-                endpointUrl: CoinGeckoApiEndpoint.coinList(
-                    ids: ids
-                ),
-                jsonDecoder: jsonDecoder
-            )
+        Just([])
+            .flatMap { _  -> AnyPublisher<[CoinModel], APIError> in
+                return NetworkService()
+                    .execute(
+                        endpointUrl: CoinGeckoApiEndpoint.coinList(
+                            ids: ids
+                        ),
+                        jsonDecoder: jsonDecoder
+                    )
+            }
+            .eraseToAnyPublisher()
     }
     
     func fetchMarketData() -> AnyPublisher<MarketDataModel, APIError> {

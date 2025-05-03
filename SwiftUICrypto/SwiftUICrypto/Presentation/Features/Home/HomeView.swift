@@ -54,7 +54,7 @@ struct HomeView: View {
             .animation(.easeInOut(duration: 0.3), value: showCoinListType)
             .padding(.horizontal)
         }
-        .onAppear {
+        .task {
             if !isFetchedData {
                 isFetchedData = true
                 homeVM.fetchCoins()
@@ -126,7 +126,7 @@ extension HomeView {
     }
     
     private var allCoinList: some View {
-        List(homeVM.filteredCoins, id: \.id) { coin in
+        List(homeVM.filteredCoins, id: \.hashValue) { coin in
             CoinItemView(coin: coin, showHoldingColumn: false) {
                 presentedDetailCoin = coin
             }
@@ -141,7 +141,7 @@ extension HomeView {
     }
     
     private var portfolioCoinList: some View {
-        List(homeVM.portfolioCoins, id: \.id) { coin in
+        List(homeVM.portfolioCoins, id: \.hashValue) { coin in
             CoinItemView(coin: coin, showHoldingColumn: true) {
                 presentedDetailCoin = coin
             }
@@ -156,7 +156,7 @@ extension HomeView {
     }
     
     private var favoriteCoinList: some View {
-        List(homeVM.favoriteCoins, id: \.id) { coin in
+        List(homeVM.favoriteCoins, id: \.hashValue) { coin in
             CoinItemView(coin: coin, showHoldingColumn: false) {
                 presentedDetailCoin = coin
             }

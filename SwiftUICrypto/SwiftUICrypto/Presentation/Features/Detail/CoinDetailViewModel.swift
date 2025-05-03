@@ -21,39 +21,31 @@ class CoinDetailViewModel: BaseViewModel {
     }
     
     func fetchCoinDetail() {
-        let coinDetailPublisher = coinGeckoApi
-            .fetchCoinDetail(coinId: coin.id)
-            .catch { [weak self] error -> Empty<CoinDetailModel, Never> in
-                self?.error = error
-                return Empty(completeImmediately: true)
-            }
-            .eraseToAnyPublisher()
-         
-        
-        coinDetailPublisher
-            .combineLatest($coin)
-            .print("fetchCoinDetail")
-            .map { [weak self] (coinDetail, coin) -> (overviewsStatistics: [StatisticModel], additionalStatistics: [StatisticModel]) in
-                guard let self else { return ([], []) }
-                
-                return (
-                    overviewsStatistics: self.mapDataOverviewStatistics(coinDetail: coinDetail, coin: coin),
-                    additionalStatistics: self.mapDataToAdditionalStatistics(coinDetail: coinDetail, coin: coin)
-                )
-            }
-            .sink { [weak self] (data) in
-                self?.overviewStatistics = data.overviewsStatistics
-                self?.additionalStatistics = data.additionalStatistics
-            }
-            .store(in: &cancellables)
-        
-        coinDetailPublisher
-            .sink(receiveValue: { [weak self] detail in
-                self?.coinDescription = detail.description.en
-                self?.homepageUrl = detail.links?.homepage?.first
-                self?.redditUrl = detail.links?.subredditUrl
-            })
-            .store(in: &cancellables)
+        coinGeckoApi
+                .fetchCoinDetail(coinId: coin.id)
+                .catch { [weak self] error -> AnyPublisher<CoinDetailModel, Never> in
+                    self?.error = error
+                    return Empty(completeImmediately: true).eraseToAnyPublisher()
+                }
+                .map { [weak self] (coinDetail) -> (overviews: [StatisticModel], additional: [StatisticModel], description: String?, homepage: String?, reddit: String?) in
+                    guard let self else { return ([], [], nil, nil, nil) }
+                    return (
+                        overviews: self.mapDataOverviewStatistics(coinDetail: coinDetail, coin: coin),
+                        additional: self.mapDataToAdditionalStatistics(coinDetail: coinDetail, coin: coin),
+                        description: coinDetail.description.en,
+                        homepage: coinDetail.links?.homepage?.first,
+                        reddit: coinDetail.links?.subredditUrl
+                    )
+                }
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] data in
+                    self?.overviewStatistics = data.overviews
+                    self?.additionalStatistics = data.additional
+                    self?.coinDescription = data.description
+                    self?.homepageUrl = data.homepage
+                    self?.redditUrl = data.reddit
+                }
+                .store(in: &cancellables)
     }
     
     func mapDataToAdditionalStatistics(

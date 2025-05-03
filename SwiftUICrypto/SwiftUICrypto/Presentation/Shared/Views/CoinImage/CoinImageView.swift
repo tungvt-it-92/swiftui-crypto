@@ -6,9 +6,11 @@
 import SwiftUI
 
 struct CoinImageView: View {
-    var coin: CoinModel
+    @StateObject private var coinImageVM: CoinImageViewModel
     
-    @StateObject private var coinImageVM = CoinImageViewModel()
+    init(coin: CoinModel) {
+        _coinImageVM = StateObject(wrappedValue: CoinImageViewModel(coin: coin))
+    }
     
     var body: some View {
         Group {
@@ -25,13 +27,6 @@ struct CoinImageView: View {
                         Image(systemName: "questionmark")
                             .resizable()
                     }
-                }
-            }
-        }
-        .onAppear {
-            Task {
-                if let imageUrl = coin.image {
-                    await coinImageVM.fetchImage(imageUrl: imageUrl)
                 }
             }
         }
