@@ -29,8 +29,8 @@ class HomeViewModel: BaseViewModel {
     @Published private var marketData: MarketData?
     @Published private var originalCoins: [CoinModel] = []
     private var coinGeckoApi: CoinGeckoApiProtocol = CoinGeckoApi()
-    private var portfolioRepository = PortfolioRepository()
-    private var favoriteCoinRepository = FavoriteCoinRepository()
+    private var portfolioRepository = PortfolioRepository(appGroupID: Constant.appGroupID)
+    private var favoriteCoinRepository = FavoriteCoinRepository(appGroupID: Constant.appGroupID)
     
     override init() {
         super.init()

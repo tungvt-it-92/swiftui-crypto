@@ -12,7 +12,7 @@ struct NetworkImageService: @unchecked Sendable {
     
     func downloadImageAsync(imageUrl: String) async -> UIImage? {
         let imageKey = imageUrl.sha256()
-        if let cachedImage = await LocalFileService.shared.getImage(
+        if let cachedImage = await LocalFileService.sharedWithAppGroup.getImage(
             folderName: coinImagesFolder,
             imageName: imageKey
         ) {
@@ -32,7 +32,7 @@ struct NetworkImageService: @unchecked Sendable {
                 return nil
             }
             
-            await LocalFileService.shared.saveImage(
+            await LocalFileService.sharedWithAppGroup.saveImage(
                 image: image,
                 imageName: imageKey,
                 folderName: self.coinImagesFolder
@@ -48,7 +48,7 @@ struct NetworkImageService: @unchecked Sendable {
     @available(*, deprecated, message: "Use downloadImageAsync(imageUrl:) instead.")
     func downloadImage(imageUrl: String) async -> AnyPublisher<UIImage?, Never> {
         let imageKey = imageUrl.sha256()
-        if let cachedImage = await LocalFileService.shared.getImage(
+        if let cachedImage = await LocalFileService.sharedWithAppGroup.getImage(
             folderName: coinImagesFolder,
             imageName: imageKey
         ) {
@@ -69,7 +69,7 @@ struct NetworkImageService: @unchecked Sendable {
             .handleEvents(receiveOutput: { image in
                 Task {
                     if let `image` = image {
-                        await LocalFileService.shared.saveImage(
+                        await LocalFileService.sharedWithAppGroup.saveImage(
                             image: `image`,
                             imageName: imageKey,
                             folderName: self.coinImagesFolder

@@ -8,8 +8,8 @@ import CoreData
 class FavoriteCoinRepository: BaseRepository {
     @Published var favoriteCoins: [FavoriteCoinEntity] = []
     
-    override init() {
-        super.init()
+    override init(appGroupID: String) {
+        super.init(appGroupID: appGroupID)
         loadFavoriteCoins()
     }
     
@@ -23,6 +23,19 @@ class FavoriteCoinRepository: BaseRepository {
         } catch {
             MyLogger.debugLog("FavoriteCoinRepository loadPortfolio error: \(error)")
         }
+    }
+    
+    func fetchFavoriteCoinsAsync() async -> [FavoriteCoinEntity] {
+        var favoriteCoins: [FavoriteCoinEntity] = []
+        let request = NSFetchRequest<FavoriteCoinEntity>(entityName: "FavoriteCoinEntity")
+        
+        do {
+            favoriteCoins = try container.viewContext.fetch(request)
+        } catch {
+            MyLogger.debugLog("FavoriteCoinRepository fetchFavoriteCoinsAsync error: \(error)")
+        }
+        
+        return favoriteCoins
     }
     
     func addCoin(coin: CoinModel) {

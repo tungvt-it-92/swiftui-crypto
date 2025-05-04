@@ -8,8 +8,8 @@ import CoreData
 class PortfolioRepository: BaseRepository {
     @Published var savedCoins: [PortfolioCoinEntity] = []
 
-    override init() {
-        super.init()
+    override init(appGroupID: String) {
+        super.init(appGroupID: appGroupID)
         loadPortfolio()
     }
     
