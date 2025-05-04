@@ -103,6 +103,13 @@ struct NetworkService {
             return .decodingFailed(
                 message: "Failed to decode api response with error: \(errorMsg)"
             )
+        case let urlSessionError as URLError:
+            switch urlSessionError.code {
+            case .notConnectedToInternet, .cannotFindHost, .cannotFindHost, .timedOut:
+                return .noInternetConnection
+            default:
+                return .unknown
+            }
         default:
             return .unknown
         }

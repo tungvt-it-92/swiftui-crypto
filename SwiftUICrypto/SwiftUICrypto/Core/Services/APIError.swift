@@ -8,6 +8,7 @@ enum APIError: LocalizedError {
     case urlInvalid
     case badResponse(url: URL?)
     case decodingFailed(message: String)
+    case noInternetConnection
     case unknown
     
     var errorDescription: String? {
@@ -18,8 +19,10 @@ enum APIError: LocalizedError {
             return "Bad response from the server: \n \(url?.absoluteString ?? "Unknown URL")"
         case let .decodingFailed(msg):
             return "Decoding failed \(msg)"
+        case .noInternetConnection:
+            return "⚠️\nNo internet connection!!!\n Please check your internet settings and try again later."
         case .unknown:
-            return "Unknown error"
+            return "⚠️\nUnknown error!!!\n.Please try again later"
         }
     }
 }
