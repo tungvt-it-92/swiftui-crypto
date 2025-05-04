@@ -6,10 +6,12 @@ import Foundation
 import UIKit
 
 struct LocalFileService {
-    nonisolated(unsafe) static let shared = LocalFileService()
-    private let cached = NSCache<NSString, UIImage>()
+    let cached = NSCache<NSString, UIImage>()
+    private let baseUrl: URL?
     
-    private init() {}
+    init(baseUrl: URL? = nil) {
+        self.baseUrl = baseUrl ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+    }
     
     func saveImage(image: UIImage, imageName: String, folderName: String) async {
         await createFolderIfNotExist(folderName: folderName)
@@ -94,4 +96,8 @@ struct LocalFileService {
         return baseUrl.appendingPathComponent(folderName)
     }
     
+}
+
+extension LocalFileService {
+    nonisolated(unsafe) static var sharedWithAppGroup: LocalFileService { .init( baseUrl: URL.sharedContainerURL(for: Constant.appGroupID)) }
 }

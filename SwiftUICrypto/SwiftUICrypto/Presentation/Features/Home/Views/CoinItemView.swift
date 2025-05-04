@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import WidgetKit
 
 struct CoinItemView: View {
     let coin: CoinModel
@@ -62,6 +63,7 @@ struct CoinItemView: View {
                 .onTapGesture {
                     homeVM.toggleFavorite(coin: coin)
                     UIApplication.shared.endEditing()
+                    WidgetCenter.shared.reloadAllTimelines()
                 }
         }
         .contentShape(Rectangle())

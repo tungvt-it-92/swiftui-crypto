@@ -111,7 +111,7 @@ class CoinDetailViewModel: BaseViewModel {
         
         let rankStatistic = StatisticModel(
             title: "Rank",
-            value: "\(coin.marketCapRank)"
+            value: coin.marketCapRank != nil ? "\(coin.marketCapRank!)" : "N/A"
         )
         
         let volumeStatistic = StatisticModel(

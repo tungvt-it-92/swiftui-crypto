@@ -28,6 +28,7 @@ struct CoinImageView: View {
                             .resizable()
                     }
                 }
+                .scaledToFit()
             }
         }
     }
