@@ -9,6 +9,7 @@ import WidgetKit
 struct CoinItemView: View {
     let coin: CoinModel
     let showHoldingColumn: Bool
+    let parentWidth: CGFloat?
     let onTapGestureAction: (() -> Void)?
     @EnvironmentObject private var homeVM: HomeViewModel
     
@@ -55,7 +56,7 @@ struct CoinItemView: View {
                     )
             }
             .minimumScaleFactor(0.1)
-            .frame(width: UIScreen.main.bounds.width / 3, alignment: .trailing)
+            .frame(width: (parentWidth ?? UIScreen.main.bounds.width) / 3, alignment: .trailing)
             
             Image(systemName: coin.favorite == true ? "star.fill" : "star")
                 .foregroundStyle(Color.theme.accentColor)
@@ -77,8 +78,8 @@ struct CoinItemView: View {
 
 #Preview(traits: .sizeThatFitsLayout) {
     Group {
-        CoinItemView(coin: previewCoin, showHoldingColumn: false) {}
-        CoinItemView(coin: previewCoin, showHoldingColumn: true) {}
+        CoinItemView(coin: previewCoin, showHoldingColumn: false, parentWidth: nil) {}
+        CoinItemView(coin: previewCoin, showHoldingColumn: true, parentWidth: nil) {}
     }
 }
 
