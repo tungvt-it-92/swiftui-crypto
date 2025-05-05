@@ -7,10 +7,15 @@ import SwiftUI
 
 struct SearchBarView: View {
     @Binding var inputText: String
+    @Binding var isSearching: Bool
     
     var body: some View {
         HStack(spacing: 5) {
-            searchIcon
+            if isSearching {
+                progressView
+            } else {
+                searchIcon
+            }
 
             inputTextField
             
@@ -40,6 +45,12 @@ extension SearchBarView {
             )
     }
     
+    var progressView: some View {
+        ProgressView()
+            .progressViewStyle(.circular)
+            .tint(Color.theme.accentColor)
+    }
+    
     var inputTextField: some View {
         TextField("Search by name or symbol...", text: $inputText)
             .autocorrectionDisabled()
@@ -61,7 +72,7 @@ extension SearchBarView {
 
 #Preview(traits: .sizeThatFitsLayout) {
     Group {
-        SearchBarView(inputText: .constant(""))
+        SearchBarView(inputText: .constant(""),  isSearching: .constant(true))
             .colorScheme(.dark)
     }
 }

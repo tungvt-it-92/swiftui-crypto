@@ -15,7 +15,7 @@ struct EditPortfolioView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    SearchBarView(inputText: $viewModel.inputSearchText)
+                    SearchBarView(inputText: $viewModel.inputSearchText, isSearching: $viewModel.isSearchingCoin)
                     
                     coinList
                     

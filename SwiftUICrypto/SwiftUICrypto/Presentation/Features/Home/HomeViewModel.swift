@@ -25,6 +25,7 @@ class HomeViewModel: BaseViewModel {
     @Published var inputSearchText: String = ""
     @Published var statistics: [StatisticModel] = []
     @Published var sortOption: SortCoinOption = .rank
+    @Published var isSearchingCoin: Bool = false
     
     @Published private var marketData: MarketData?
     @Published private var originalCoins: [CoinModel] = []
@@ -51,22 +52,15 @@ class HomeViewModel: BaseViewModel {
             }
             .combineLatest(syncLocalCoinsWithRemote(), searchRemoteCoins())
             .map { [weak self] (originalCoins, syncCoins, searchRemoteCoins) -> [CoinModel] in
-                guard self != nil else { return [] }
-                let newSyncCoins = syncCoins.filter { coin in
-                    !originalCoins.contains(where: { $0.id == coin.id })
-                }
-                let newSearchCoins = searchRemoteCoins.filter { coin in
-                    !originalCoins.contains(where: { $0.id == coin.id }) &&
-                    !syncCoins.contains(where: { $0.id == coin.id })
-                }
-                return originalCoins + newSyncCoins + newSearchCoins
+                guard let `self` = self else { return [] }
+                return combineCoins(originalCoins: originalCoins, syncCoins: syncCoins, searchRemoteCoins: searchRemoteCoins)
             }
             .combineLatest(favoriteCoinRepository.$favoriteCoins)
             .print("fetchCoins")
             .map(mapFavoriteCoins)
             .removeDuplicates()
             .sink(receiveValue: { [weak self] coins in
-                self?.originalCoins = coins
+                self?.updateOriginalCoins(coins: coins)
             })
             .store(in: &cancellables)
     }
@@ -142,14 +136,21 @@ class HomeViewModel: BaseViewModel {
         $inputSearchText
             .removeDuplicates()
             .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
-            .map { queryString -> AnyPublisher<[CoinModel], Never> in
-                if queryString.isBlank {
+            .map { [weak self] queryString -> AnyPublisher<[CoinModel], Never> in
+                guard let self = self, !queryString.isBlank else {
                     return Just([]).eraseToAnyPublisher()
                 }
                 
-                return self.coinGeckoApi.searchCoin(query: queryString)
+                
+                isSearchingCoin = true
+                return coinGeckoApi.searchCoin(query: queryString)
                     .print("searchRemoteCoins")
                     .replaceError(with: [])
+                    .handleEvents(receiveCompletion: { [weak self] _ in
+                        self?.isSearchingCoin = false
+                    }, receiveCancel: { [weak self] in
+                        self?.isSearchingCoin = false
+                    })
                     .eraseToAnyPublisher()
             }
             .switchToLatest()
@@ -243,6 +244,30 @@ class HomeViewModel: BaseViewModel {
                 
             }
             .store(in: &cancellables)
+    }
+    
+    private func updateOriginalCoins(coins: [CoinModel]) {
+        var existingCoins = originalCoins
+        let newCoinsByIds = Dictionary(uniqueKeysWithValues: coins.map{ ($0.id, $0) })
+        existingCoins = existingCoins.map { newCoinsByIds[$0.id] ?? $0  }
+        let existingCoinById = Dictionary(uniqueKeysWithValues: existingCoins.map{ ($0.id, $0) })
+        
+        for newCoin in coins where existingCoinById[newCoin.id] == nil  {
+            existingCoins.append(newCoin)
+        }
+        
+        originalCoins = existingCoins
+    }
+    
+    private func combineCoins(originalCoins: [CoinModel], syncCoins: [CoinModel], searchRemoteCoins: [CoinModel]) -> [CoinModel] {
+        let newSyncCoins = syncCoins.filter { coin in
+            !originalCoins.contains(where: { $0.id == coin.id })
+        }
+        let newSearchCoins = searchRemoteCoins.filter { coin in
+            !originalCoins.contains(where: { $0.id == coin.id }) &&
+            !syncCoins.contains(where: { $0.id == coin.id })
+        }
+        return originalCoins + newSyncCoins + newSearchCoins
     }
     
     private func filterCoins(filterKey: String, coins: [CoinModel]) -> [CoinModel] {

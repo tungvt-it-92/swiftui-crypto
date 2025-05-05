@@ -245,7 +245,7 @@ extension HomeView {
     }
     
     private var searchView: some View {
-        SearchBarView(inputText: $homeVM.inputSearchText)
+        SearchBarView(inputText: $homeVM.inputSearchText, isSearching: $homeVM.isSearchingCoin)
             .padding(.vertical, 15)
     }
 }
