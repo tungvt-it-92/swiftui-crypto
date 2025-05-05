@@ -21,38 +21,40 @@ struct HomeView: View {
     
     var body: some View {
         
-        ZStack {
-            Color.theme.background
-                .ignoresSafeArea()
-            
-            VStack {
-                headerView
+        GeometryReader { geometry in
+            ZStack {
+                Color.theme.background
+                    .ignoresSafeArea()
                 
-                StatisticView(
-                    statisticModels: homeVM.statistics,
-                    showPortfolioColumn: showCoinListType == .portfolio
-                )
-                
-                searchView
-                
-                tableHeaderView
-                
-                if showCoinListType == .all {
-                    allCoinList
+                VStack {
+                    headerView
+                    
+                    StatisticView(
+                        statisticModels: homeVM.statistics,
+                        showPortfolioColumn: showCoinListType == .portfolio
+                    )
+                    
+                    searchView
+                    
+                    tableHeaderView(parentWidth: geometry.size.width)
+                    
+                    if showCoinListType == .all {
+                        allCoinList(parentWidth: geometry.size.width)
+                    }
+                    
+                    if showCoinListType == .portfolio {
+                        portfolioCoinList(parentWidth: geometry.size.width)
+                    }
+                    
+                    if showCoinListType == .favorite {
+                        favoriteCoinList(parentWidth: geometry.size.width)
+                    }
+                    
+                    Spacer(minLength: 0)
                 }
-                
-                if showCoinListType == .portfolio {
-                    portfolioCoinList
-                }
-                
-                if showCoinListType == .favorite {
-                    favoriteCoinList
-                }
-                
-                Spacer(minLength: 0)
+                .animation(.easeInOut(duration: 0.3), value: showCoinListType)
+                .padding(.horizontal)
             }
-            .animation(.easeInOut(duration: 0.3), value: showCoinListType)
-            .padding(.horizontal)
         }
         .task {
             if !isFetchedData {
@@ -109,7 +111,7 @@ extension HomeView {
                 .foregroundStyle(Color.theme.accentColor)
             
             Spacer()
-  
+            
             CircleButton(iconName: "chevron.right") {
                 let current = showCoinListType
                 switch current {
@@ -125,9 +127,9 @@ extension HomeView {
         }
     }
     
-    private var allCoinList: some View {
+    private func allCoinList(parentWidth: CGFloat) -> some View {
         List(homeVM.filteredCoins, id: \.hashValue) { coin in
-            CoinItemView(coin: coin, showHoldingColumn: false) {
+            CoinItemView(coin: coin, showHoldingColumn: false, parentWidth: parentWidth) {
                 presentedDetailCoin = coin
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -140,9 +142,9 @@ extension HomeView {
         }
     }
     
-    private var portfolioCoinList: some View {
+    private func portfolioCoinList(parentWidth: CGFloat) -> some View {
         List(homeVM.portfolioCoins, id: \.hashValue) { coin in
-            CoinItemView(coin: coin, showHoldingColumn: true) {
+            CoinItemView(coin: coin, showHoldingColumn: true, parentWidth: parentWidth) {
                 presentedDetailCoin = coin
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -155,9 +157,9 @@ extension HomeView {
         }
     }
     
-    private var favoriteCoinList: some View {
+    private func favoriteCoinList(parentWidth: CGFloat) -> some View {
         List(homeVM.favoriteCoins, id: \.hashValue) { coin in
-            CoinItemView(coin: coin, showHoldingColumn: false) {
+            CoinItemView(coin: coin, showHoldingColumn: false, parentWidth: parentWidth) {
                 presentedDetailCoin = coin
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -170,7 +172,7 @@ extension HomeView {
         }
     }
     
-    private var tableHeaderView: some View {
+    private func tableHeaderView(parentWidth: CGFloat) -> some View {
         HStack(spacing: 0) {
             HStack {
                 Text("Coin")
@@ -224,7 +226,7 @@ extension HomeView {
                 homeVM.sortOption = homeVM.sortOption == .price ? .priceReversed : .price
             }
             .frame(
-                width: UIScreen.main.bounds.width / 3,
+                width: parentWidth / 3,
                 alignment: .trailing
             )
             
