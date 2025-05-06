@@ -9,6 +9,7 @@ struct CoinDetailView: View {
     var coin: CoinModel
     @StateObject private var coinDetailViewModel: CoinDetailViewModel
     @State private var readMoreDescription: Bool = true
+    @State private var isFullScreenChartPresented: Bool = false
     
     private let columns: [GridItem] = [
         GridItem(.flexible()),
@@ -25,7 +26,9 @@ struct CoinDetailView: View {
             VStack {
                 ChartView(coin: coinDetailViewModel.coin)
                     .frame(height: 250)
-                
+                    .overlay(alignment: .topTrailing) {
+                        showFullScreenChartButton
+                    }
                 Group {
                     overviewViews
                     additionalViews
@@ -45,6 +48,12 @@ struct CoinDetailView: View {
             coinDetailViewModel.fetchCoinDetail()
         }
         .alert(isPresented: $coinDetailViewModel.isShowError, error: coinDetailViewModel.error) {}
+        .landscapeFullScreenCover(isPresented: $isFullScreenChartPresented) {
+            FullScreenChartView(isPresented: $isFullScreenChartPresented, coin: coin)
+        }
+        .transaction { transaction in
+            transaction.disablesAnimations = true
+        }
     }
 }
 
@@ -154,6 +163,18 @@ extension CoinDetailView {
         .tint(.blue)
         .frame(maxWidth: .infinity, alignment: .leading)
         .font(.subheadline)
+    }
+    
+    private var showFullScreenChartButton: some View {
+        Button(action: {
+            isFullScreenChartPresented = true
+        }) {
+            Image(systemName: "arrow.up.left.and.down.right.and.arrow.up.right.and.down.left")
+                .font(.title3)
+                .foregroundStyle(Color.theme.secondaryTextColor)
+                .padding()
+                .offset(x: 0, y: -40)
+        }
     }
 }
 
