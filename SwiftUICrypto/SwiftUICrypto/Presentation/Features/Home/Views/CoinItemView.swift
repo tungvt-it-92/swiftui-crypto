@@ -58,15 +58,9 @@ struct CoinItemView: View {
             .minimumScaleFactor(0.1)
             .frame(width: (parentWidth ?? UIScreen.main.bounds.width) / 3, alignment: .trailing)
             
-            Image(systemName: coin.favorite == true ? "star.fill" : "star")
-                .foregroundStyle(Color.theme.accentColor)
-                .frame(width: 30, height: 30)
-                .onTapGesture {
-                    homeVM.toggleFavorite(coin: coin)
-                    UIApplication.shared.endEditing()
-                    WidgetCenter.shared.reloadAllTimelines()
-                    HapticFeedback.notify(type: .success)
-                }
+            FavoriteToggleButton(initialValue: coin.favorite ?? false) {
+                homeVM.toggleFavorite(coin: coin)
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -82,6 +76,7 @@ struct CoinItemView: View {
         CoinItemView(coin: previewCoin, showHoldingColumn: false, parentWidth: nil) {}
         CoinItemView(coin: previewCoin, showHoldingColumn: true, parentWidth: nil) {}
     }
+    .environmentObject(PreviewDataProvider.shared.previewHomeVM)
 }
 
 #endif
