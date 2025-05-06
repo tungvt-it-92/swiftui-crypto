@@ -65,6 +65,7 @@ struct CoinItemView: View {
                     homeVM.toggleFavorite(coin: coin)
                     UIApplication.shared.endEditing()
                     WidgetCenter.shared.reloadAllTimelines()
+                    HapticFeedback.notify(type: .success)
                 }
         }
         .contentShape(Rectangle())
