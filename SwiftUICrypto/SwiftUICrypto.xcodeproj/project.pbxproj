@@ -85,6 +85,7 @@
 				"Core/Extension/Publisher+Extension.swift",
 				"Core/Extension/String+Extension.swift",
 				"Core/Extension/UIApplication+Extension.swift",
+				"Core/Extension/UIDevice+Extension.swift",
 				"Core/Extension/URL+Extension.swift",
 				Core/Logger/Logger.swift,
 				Core/Services/APIError.swift,

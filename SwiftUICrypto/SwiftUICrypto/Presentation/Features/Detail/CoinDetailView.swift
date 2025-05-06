@@ -50,9 +50,7 @@ struct CoinDetailView: View {
         .alert(isPresented: $coinDetailViewModel.isShowError, error: coinDetailViewModel.error) {}
         .landscapeFullScreenCover(isPresented: $isFullScreenChartPresented) {
             FullScreenChartView(isPresented: $isFullScreenChartPresented, coin: coin)
-        }
-        .transaction { transaction in
-            transaction.disablesAnimations = true
+                .frame(maxHeight: UIDevice.current.isPad ? UIScreen.main.bounds.height/2 : nil)
         }
     }
 }
@@ -152,7 +150,7 @@ extension CoinDetailView {
         VStack(alignment: .leading) {
             if let homepageUrlString = coinDetailViewModel.homepageUrl,
                let homepageUrl = URL(string: homepageUrlString) {
-                SwiftUI.Link("Webstite", destination: homepageUrl)
+                SwiftUI.Link("Website", destination: homepageUrl)
             }
             
             if let redditUrlString = coinDetailViewModel.redditUrl,
@@ -167,7 +165,11 @@ extension CoinDetailView {
     
     private var showFullScreenChartButton: some View {
         Button(action: {
-            isFullScreenChartPresented = true
+            var transaction = Transaction(animation: .none)
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                isFullScreenChartPresented.toggle()
+            }
         }) {
             Image(systemName: "arrow.up.left.and.down.right.and.arrow.up.right.and.down.left")
                 .font(.title3)

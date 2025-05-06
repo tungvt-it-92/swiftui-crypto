@@ -51,7 +51,7 @@ struct StatisticView: View {
             }
         }
         .frame(
-            width: parentWidth - 30,
+            width: max(parentWidth - 30, 0),
             alignment: showPortfolioColumn ? .trailing : .leading
         )
     }
