@@ -4,12 +4,14 @@
 //
 
 import SwiftUI
+import WidgetKit
 
 struct CoinDetailView: View {
     var coin: CoinModel
     @StateObject private var coinDetailViewModel: CoinDetailViewModel
     @State private var readMoreDescription: Bool = true
     @State private var isFullScreenChartPresented: Bool = false
+    @EnvironmentObject private var homeViewModel: HomeViewModel
     
     private let columns: [GridItem] = [
         GridItem(.flexible()),
@@ -119,6 +121,10 @@ extension CoinDetailView {
                 
                 CoinImageView(coin: coinDetailViewModel.coin)
                     .frame(width: 25, height: 25)
+                
+                FavoriteToggleButton(initialValue: coin.favorite ?? false) {
+                    homeViewModel.toggleFavorite(coin: coin)
+                }
             }
         }
     }
@@ -187,6 +193,7 @@ extension CoinDetailView {
     NavigationStack {
         CoinDetailView(coin: previewCoin)
     }
+    .environmentObject(PreviewDataProvider.shared.previewHomeVM)
 }
 
 #endif
