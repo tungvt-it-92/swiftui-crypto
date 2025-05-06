@@ -31,7 +31,8 @@ struct HomeView: View {
                     
                     StatisticView(
                         statisticModels: homeVM.statistics,
-                        showPortfolioColumn: showCoinListType == .portfolio
+                        showPortfolioColumn: showCoinListType == .portfolio,
+                        parentWidth: geometry.size.width
                     )
                     
                     searchView

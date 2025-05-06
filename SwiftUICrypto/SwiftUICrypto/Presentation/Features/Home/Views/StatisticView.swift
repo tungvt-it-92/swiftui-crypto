@@ -38,19 +38,20 @@ struct StatisticColumn: View {
 struct StatisticView: View {
     let statisticModels: [StatisticModel]
     let showPortfolioColumn: Bool
+    let parentWidth: CGFloat
     
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
             ForEach(statisticModels, id: \.self) { statisticModel in
                 StatisticColumn(statisticsModel: statisticModel)
                     .frame(
-                        width: (UIScreen.main.bounds.width - 30) / 3,
+                        width: (parentWidth - 30) / 3,
                         alignment: .center
                     )
             }
         }
         .frame(
-            width: UIScreen.main.bounds.width - 30,
+            width: parentWidth - 30,
             alignment: showPortfolioColumn ? .trailing : .leading
         )
     }
@@ -61,7 +62,8 @@ struct StatisticView: View {
 #Preview(traits: .sizeThatFitsLayout) {
     StatisticView(
         statisticModels: previewStatistics,
-        showPortfolioColumn: false
+        showPortfolioColumn: false,
+        parentWidth: 300
     )
 }
 
