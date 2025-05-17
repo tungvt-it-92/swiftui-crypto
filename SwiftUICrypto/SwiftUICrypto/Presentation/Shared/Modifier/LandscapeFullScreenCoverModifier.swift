@@ -13,17 +13,13 @@ struct LandscapeFullScreenCoverModifier<CoverContent: View>: ViewModifier {
             .fullScreenCover(isPresented: $isPresented) {
                 coverContent()
             }
-            .supportedOrientations(isPresented ? .landscapeRight : .portrait)
+            .preference(key: SupportedOrientationsPreferenceKey.self, value: isPresented ? .landscapeRight : .portrait)
     }
 }
 
 extension View {
     func landscapeFullScreenCover(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> some View) -> some View {
         modifier(LandscapeFullScreenCoverModifier(isPresented: isPresented, coverContent: content))
-    }
-
-    func supportedOrientations(_ supportedOrientations: UIInterfaceOrientationMask) -> some View {
-        return preference(key: SupportedOrientationsPreferenceKey.self, value: supportedOrientations)
     }
 }
 
